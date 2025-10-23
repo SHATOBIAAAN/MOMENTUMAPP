@@ -65,9 +65,6 @@ flutter build apk --release
 
 # iOS
 flutter build ios --release
-
-# Web
-flutter build web --release
 ```
 
 ## 📋 Функции
