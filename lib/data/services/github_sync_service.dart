@@ -40,7 +40,9 @@ class GitHubSyncService {
   bool _autoSyncEnabled = true;
   bool _dataClearedByUser = false;
   DateTime? _lastSyncTime;
+  DateTime? _lastRateLimitHit;
   Timer? _autoSyncTimer;
+  Timer? _debounceTimer;
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
 
   // Data change listeners
@@ -539,7 +541,8 @@ class GitHubSyncService {
         } else if (e.response?.statusCode == 401) {
           errorMessage = 'Authentication failed - check your GitHub token';
         } else if (e.response?.statusCode == 403) {
-          errorMessage = 'Access denied - check repository permissions';
+          _lastRateLimitHit = DateTime.now();
+          errorMessage = 'GitHub API rate limit exceeded - waiting 1 hour before retry';
         } else if (e.response?.statusCode == 404) {
           errorMessage = 'Repository not found - check repository name';
         } else {
@@ -1418,7 +1421,7 @@ class GitHubSyncService {
     debugPrint('GitHubSyncService: Data change listeners setup complete');
   }
 
-  /// Trigger sync when data changes
+  /// Trigger sync when data changes (with debouncing and rate limit protection)
   void _triggerSync() {
     debugPrint('GitHubSyncService: _triggerSync called');
 
@@ -1437,8 +1440,25 @@ class GitHubSyncService {
       return;
     }
 
-    debugPrint('GitHubSyncService: Triggering sync due to data change...');
-    syncAll();
+    // Check if we hit rate limit recently (wait 1 hour)
+    if (_lastRateLimitHit != null) {
+      final timeSinceRateLimit = DateTime.now().difference(_lastRateLimitHit!);
+      if (timeSinceRateLimit.inMinutes < 60) {
+        debugPrint('GitHubSyncService: Rate limit hit recently, skipping sync for ${60 - timeSinceRateLimit.inMinutes} more minutes');
+        return;
+      }
+    }
+
+    // Cancel previous debounce timer
+    _debounceTimer?.cancel();
+    
+    // Set new debounce timer (30 seconds delay to reduce API calls)
+    _debounceTimer = Timer(const Duration(seconds: 30), () {
+      debugPrint('GitHubSyncService: Triggering sync due to data change...');
+      syncAll();
+    });
+    
+    debugPrint('GitHubSyncService: Debounced sync scheduled in 30 seconds');
   }
 
   /// Mark that user has cleared all data
@@ -1570,6 +1590,7 @@ class GitHubSyncService {
   /// Dispose resources
   void dispose() {
     _stopAutoSync();
+    _debounceTimer?.cancel();
     _connectivitySubscription?.cancel();
     _taskChangesSubscription?.cancel();
     _workspaceChangesSubscription?.cancel();
