@@ -17,11 +17,17 @@
 
 ## 📱 Демонстрация
 
+### 🎥 Видео демо
+[![Momentum Demo](screenshots/demo.mov)](screenshots/demo.mov)
+*Нажмите на изображение для просмотра видео демо*
+
+### 📸 Скриншоты
+
 <div align="center">
 
-| Главный экран | Создание задачи | Темная тема |
+| [Главный экран](screenshots/home.png) | [Создание задачи](screenshots/crate.png) | [Темная тема](screenshots/dark.png) |
 |:---:|:---:|:---:|
-| ![Home Screen](https://via.placeholder.com/300x600/2196F3/FFFFFF?text=Home+Screen) | ![Create Task](https://via.placeholder.com/300x600/4CAF50/FFFFFF?text=Create+Task) | ![Dark Theme](https://via.placeholder.com/300x600/424242/FFFFFF?text=Dark+Theme) |
+| ![Home Screen](screenshots/home.png) | ![Create Task](screenshots/crate.png) | ![Dark Theme](screenshots/dark.png) |
 
 </div>
 
@@ -151,9 +157,9 @@ flutter test test/domain/usecases/get_all_tasks_use_case_test.dart
 
 <div align="center">
 
-| Главный экран | Создание задачи | Настройки |
+| [Главный экран](screenshots/home.png) | [Создание задачи](screenshots/crate.png) | [Настройки](screenshots/setting.png) |
 |:---:|:---:|:---:|
-| ![Screenshot 1](https://via.placeholder.com/300x600/2196F3/FFFFFF?text=Home) | ![Screenshot 2](https://via.placeholder.com/300x600/4CAF50/FFFFFF?text=Create) | ![Screenshot 3](https://via.placeholder.com/300x600/FF9800/FFFFFF?text=Settings) |
+| ![Screenshot 1](screenshots/home.png) | ![Screenshot 2](screenshots/crate.png) | ![Screenshot 3](screenshots/setting.png) |
 
 </div>
 
@@ -172,13 +178,6 @@ flutter test test/domain/usecases/get_all_tasks_use_case_test.dart
 - [x] Доступность (WCAG AA)
 - [x] Unit и Widget тесты
 
-### 🔄 В разработке
-
-- [ ] Уведомления
-- [ ] Экспорт/импорт
-- [ ] Командная работа
-- [ ] Мобильные виджеты
-
 ## 📊 Статистика проекта
 
 <div align="center">
@@ -192,25 +191,6 @@ flutter test test/domain/usecases/get_all_tasks_use_case_test.dart
 | **Платформы** | 3 (Android, iOS, Web) |
 
 </div>
-
-## 🤝 Участие в разработке
-
-Мы приветствуем вклад в развитие проекта! 
-
-### Как помочь
-
-1. **Fork** репозитория
-2. Создайте **feature branch** (`git checkout -b feature/amazing-feature`)
-3. **Commit** изменения (`git commit -m 'Add amazing feature'`)
-4. **Push** в branch (`git push origin feature/amazing-feature`)
-5. Откройте **Pull Request**
-
-### Требования к коду
-
-- Следуйте [Dart Style Guide](https://dart.dev/guides/language/effective-dart/style)
-- Покрывайте новый код тестами
-- Обновляйте документацию
-- Используйте осмысленные commit сообщения
 
 ## 📄 Лицензия
 
