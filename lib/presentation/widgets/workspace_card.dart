@@ -9,12 +9,12 @@ class WorkspaceCard extends StatelessWidget {
   final bool isListView;
 
   const WorkspaceCard({
-    Key? key,
+    super.key,
     required this.workspace,
     required this.isDark,
     required this.onTap,
     this.isListView = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

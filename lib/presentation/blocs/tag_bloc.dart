@@ -5,7 +5,6 @@ import '../../domain/usecases/delete_tag_use_case.dart';
 import 'tag_event.dart';
 import 'tag_state.dart';
 
-/// Tag BLoC - Business Logic Component for tag management
 class TagBloc extends Bloc<TagEvent, TagState> {
   final GetAllTagsUseCase getAllTagsUseCase;
   final CreateTagUseCase createTagUseCase;
@@ -16,14 +15,12 @@ class TagBloc extends Bloc<TagEvent, TagState> {
     required this.createTagUseCase,
     required this.deleteTagUseCase,
   }) : super(TagInitial()) {
-    // Register event handlers
     on<LoadTagsEvent>(_onLoadTags);
     on<CreateTagEvent>(_onCreateTag);
     on<DeleteTagEvent>(_onDeleteTag);
     on<RefreshTagsEvent>(_onRefreshTags);
   }
 
-  /// Load all tags
   Future<void> _onLoadTags(
     LoadTagsEvent event,
     Emitter<TagState> emit,

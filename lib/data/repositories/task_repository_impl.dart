@@ -3,10 +3,8 @@ import '../../domain/repositories/task_repository.dart';
 import '../../domain/repositories/workspace_repository.dart';
 import '../datasources/task_local_data_source.dart';
 import '../models/task_model.dart';
+import 'package:flutter/material.dart';
 
-/// Implementation of TaskRepository
-/// Bridges the domain layer with the data layer
-/// Converts between domain entities and data models
 class TaskRepositoryImpl implements TaskRepository {
   final TaskLocalDataSource localDataSource;
   final WorkspaceRepository? workspaceRepository;
@@ -102,7 +100,6 @@ class TaskRepositoryImpl implements TaskRepository {
       final taskModel = TaskModel.fromEntity(task);
       await localDataSource.createTask(taskModel);
       
-      // Update workspace statistics if workspaceId is provided
       if (task.workspaceId != null && workspaceRepository != null) {
         await _updateWorkspaceStatistics(task.workspaceId!);
       }
@@ -114,19 +111,15 @@ class TaskRepositoryImpl implements TaskRepository {
   @override
   Future<void> updateTask(Task task) async {
     try {
-      // Get existing task model from database
       final existingTaskModel = await localDataSource.getTaskById(task.id);
       if (existingTaskModel != null) {
-        // Update existing model with new data
         existingTaskModel.updateFromEntity(task);
         await localDataSource.updateTask(existingTaskModel);
       } else {
-        // If task doesn't exist, create new one
         final taskModel = TaskModel.fromEntity(task);
         await localDataSource.updateTask(taskModel);
       }
       
-      // Update workspace statistics if workspaceId is provided
       if (task.workspaceId != null && workspaceRepository != null) {
         await _updateWorkspaceStatistics(task.workspaceId!);
       }
@@ -138,7 +131,6 @@ class TaskRepositoryImpl implements TaskRepository {
   @override
   Future<void> deleteTask(int id) async {
     try {
-      // Get task before deleting to get workspaceId
       final taskModel = await localDataSource.getTaskById(id);
       if (taskModel == null) {
         throw Exception('Task with id $id not found');
@@ -149,7 +141,6 @@ class TaskRepositoryImpl implements TaskRepository {
         throw Exception('Task with id $id not found');
       }
       
-      // Update workspace statistics if workspaceId is provided
       if (taskModel.workspaceId != null && workspaceRepository != null) {
         await _updateWorkspaceStatistics(taskModel.workspaceId!);
       }
@@ -161,7 +152,6 @@ class TaskRepositoryImpl implements TaskRepository {
   @override
   Future<void> toggleTaskCompletion(int id) async {
     try {
-      // Get task before toggling to get workspaceId
       final taskModel = await localDataSource.getTaskById(id);
       if (taskModel == null) {
         throw Exception('Task with id $id not found');
@@ -169,7 +159,6 @@ class TaskRepositoryImpl implements TaskRepository {
       
       await localDataSource.toggleTaskCompletion(id);
       
-      // Update workspace statistics if workspaceId is provided
       if (taskModel.workspaceId != null && workspaceRepository != null) {
         await _updateWorkspaceStatistics(taskModel.workspaceId!);
       }
@@ -213,27 +202,23 @@ class TaskRepositoryImpl implements TaskRepository {
     );
   }
 
-  /// Update workspace statistics based on tasks
   Future<void> _updateWorkspaceStatistics(int workspaceId) async {
     if (workspaceRepository == null) return;
     
     try {
-      // Get all tasks for this workspace
       final allTasks = await localDataSource.getAllTasks();
       final workspaceTasks = allTasks.where((task) => task.workspaceId == workspaceId).toList();
       
       final totalTasks = workspaceTasks.length;
       final completedTasks = workspaceTasks.where((task) => task.isCompleted).length;
       
-      // Update workspace statistics
       await workspaceRepository!.updateWorkspaceTaskCounts(
         workspaceId, 
         totalTasks, 
         completedTasks
       );
     } catch (e) {
-      // Don't throw error for statistics update failure
-      print('Failed to update workspace statistics: $e');
+      debugPrint('Failed to update workspace statistics: $e');
     }
   }
 }

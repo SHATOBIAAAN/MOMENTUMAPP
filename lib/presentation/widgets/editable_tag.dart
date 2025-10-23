@@ -10,12 +10,12 @@ class EditableTag extends StatefulWidget {
   final Function(Tag) onUpdate;
 
   const EditableTag({
-    Key? key,
+    super.key,
     required this.tag,
     required this.isDark,
     required this.onDelete,
     required this.onUpdate,
-  }) : super(key: key);
+  });
 
   @override
   State<EditableTag> createState() => _EditableTagState();

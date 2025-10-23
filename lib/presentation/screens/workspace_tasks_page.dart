@@ -16,9 +16,9 @@ class WorkspaceTasksPage extends StatefulWidget {
   final Workspace workspace;
 
   const WorkspaceTasksPage({
-    Key? key,
+    super.key,
     required this.workspace,
-  }) : super(key: key);
+  });
 
   @override
   State<WorkspaceTasksPage> createState() => _WorkspaceTasksPageState();

@@ -9,7 +9,7 @@ import '../blocs/tag_state.dart';
 import '../../core/app_state_provider.dart';
 
 class TagsPage extends StatefulWidget {
-  const TagsPage({Key? key}) : super(key: key);
+  const TagsPage({super.key});
 
   @override
   State<TagsPage> createState() => _TagsPageState();

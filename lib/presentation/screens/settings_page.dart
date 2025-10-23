@@ -7,7 +7,7 @@ import '../../core/app_state_provider.dart';
 import '../../data/services/github_sync_service.dart';
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({Key? key}) : super(key: key);
+  const SettingsPage({super.key});
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();

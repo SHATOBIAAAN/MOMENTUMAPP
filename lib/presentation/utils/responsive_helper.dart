@@ -1,63 +1,49 @@
 import 'package:flutter/material.dart';
 
-/// Helper class for responsive and adaptive layouts
-/// Provides utilities for different screen sizes and orientations
 class ResponsiveHelper {
   ResponsiveHelper._();
-
-  // Breakpoints (Material Design guidelines)
   static const double mobileBreakpoint = 600;
   static const double tabletBreakpoint = 900;
   static const double desktopBreakpoint = 1200;
   static const double largeDesktopBreakpoint = 1800;
 
-  /// Get screen width
   static double screenWidth(BuildContext context) {
     return MediaQuery.of(context).size.width;
   }
 
-  /// Get screen height
   static double screenHeight(BuildContext context) {
     return MediaQuery.of(context).size.height;
   }
 
-  /// Get screen orientation
   static Orientation screenOrientation(BuildContext context) {
     return MediaQuery.of(context).orientation;
   }
 
-  /// Check if portrait orientation
   static bool isPortrait(BuildContext context) {
     return screenOrientation(context) == Orientation.portrait;
   }
 
-  /// Check if landscape orientation
   static bool isLandscape(BuildContext context) {
     return screenOrientation(context) == Orientation.landscape;
   }
 
-  /// Check if mobile device
   static bool isMobile(BuildContext context) {
     return screenWidth(context) < mobileBreakpoint;
   }
 
-  /// Check if tablet device
   static bool isTablet(BuildContext context) {
     final width = screenWidth(context);
     return width >= mobileBreakpoint && width < desktopBreakpoint;
   }
 
-  /// Check if desktop device
   static bool isDesktop(BuildContext context) {
     return screenWidth(context) >= desktopBreakpoint;
   }
 
-  /// Check if large desktop
   static bool isLargeDesktop(BuildContext context) {
     return screenWidth(context) >= largeDesktopBreakpoint;
   }
 
-  /// Get device type
   static DeviceType getDeviceType(BuildContext context) {
     final width = screenWidth(context);
     if (width < mobileBreakpoint) {
@@ -71,7 +57,6 @@ class ResponsiveHelper {
     }
   }
 
-  /// Get responsive value based on screen size
   static T responsiveValue<T>(
     BuildContext context, {
     required T mobile,
@@ -92,7 +77,6 @@ class ResponsiveHelper {
     }
   }
 
-  /// Get responsive font size
   static double responsiveFontSize(
     BuildContext context, {
     required double mobile,
@@ -107,7 +91,6 @@ class ResponsiveHelper {
     );
   }
 
-  /// Get responsive padding
   static EdgeInsets responsivePadding(
     BuildContext context, {
     required EdgeInsets mobile,
@@ -122,7 +105,6 @@ class ResponsiveHelper {
     );
   }
 
-  /// Get responsive spacing
   static double responsiveSpacing(
     BuildContext context, {
     required double mobile,
@@ -137,7 +119,6 @@ class ResponsiveHelper {
     );
   }
 
-  /// Get number of grid columns based on screen size
   static int responsiveGridColumns(BuildContext context) {
     return responsiveValue(
       context,
@@ -148,12 +129,11 @@ class ResponsiveHelper {
     );
   }
 
-  /// Get responsive grid aspect ratio
   static double responsiveGridAspectRatio(BuildContext context) {
     return responsiveValue(context, mobile: 0.8, tablet: 1.0, desktop: 1.2);
   }
 
-  /// Get responsive max width for content
+  /// Получить адаптивную максимальную ширину для контента
   static double responsiveMaxWidth(BuildContext context) {
     return responsiveValue(
       context,
@@ -164,7 +144,7 @@ class ResponsiveHelper {
     );
   }
 
-  /// Create responsive builder
+  /// Создать адаптивный билдер
   static Widget responsiveBuilder(
     BuildContext context, {
     required WidgetBuilder mobile,
@@ -185,21 +165,21 @@ class ResponsiveHelper {
     }
   }
 
-  /// Get responsive card width
+  /// Получить адаптивную ширину карточки
   static double responsiveCardWidth(BuildContext context) {
     final screenW = screenWidth(context);
     if (isMobile(context)) {
-      return screenW - 32; // Full width with padding
+      return screenW - 32; // Полная ширина с отступами
     } else if (isTablet(context)) {
-      return (screenW - 48) / 2; // 2 columns
+      return (screenW - 48) / 2; // 2 колонки
     } else if (isDesktop(context)) {
-      return (screenW - 64) / 3; // 3 columns
+      return (screenW - 64) / 3; // 3 колонки
     } else {
-      return (screenW - 80) / 4; // 4 columns
+      return (screenW - 80) / 4; // 4 колонки
     }
   }
 
-  /// Get responsive card height
+  /// Получить адаптивную высоту карточки
   static double responsiveCardHeight(BuildContext context) {
     return responsiveValue(
       context,
@@ -210,7 +190,7 @@ class ResponsiveHelper {
     );
   }
 
-  /// Get responsive icon size
+  /// Получить адаптивный размер иконки
   static double responsiveIconSize(BuildContext context, {double base = 24}) {
     return responsiveValue(
       context,
@@ -220,17 +200,17 @@ class ResponsiveHelper {
     );
   }
 
-  /// Get responsive border radius
+  /// Получить адаптивный радиус границы
   static double responsiveBorderRadius(BuildContext context) {
     return responsiveValue(context, mobile: 12, tablet: 16, desktop: 20);
   }
 
-  /// Get responsive app bar height
+  /// Получить адаптивную высоту панели приложения
   static double responsiveAppBarHeight(BuildContext context) {
     return responsiveValue(context, mobile: 56, tablet: 64, desktop: 72);
   }
 
-  /// Get responsive drawer width
+  /// Получить адаптивную ширину боковой панели
   static double responsiveDrawerWidth(BuildContext context) {
     return responsiveValue(
       context,
@@ -240,7 +220,7 @@ class ResponsiveHelper {
     );
   }
 
-  /// Create adaptive list view
+  /// Создать адаптивный список
   static Widget adaptiveListView({
     required BuildContext context,
     required List<Widget> children,
@@ -265,7 +245,7 @@ class ResponsiveHelper {
     }
   }
 
-  /// Create adaptive scaffold with navigation
+  /// Создать адаптивный каркас с навигацией
   static Widget adaptiveScaffold({
     required BuildContext context,
     required Widget body,
@@ -275,7 +255,7 @@ class ResponsiveHelper {
     List<Widget>? navigationItems,
   }) {
     if (isMobile(context)) {
-      // Mobile: standard scaffold with drawer
+      // Мобильный: стандартный каркас с боковой панелью
       return Scaffold(
         appBar: appBar,
         drawer: drawer,
@@ -283,7 +263,7 @@ class ResponsiveHelper {
         floatingActionButton: floatingActionButton,
       );
     } else if (isTablet(context)) {
-      // Tablet: scaffold with rail
+      // Планшет: каркас с рельсом
       return Scaffold(
         appBar: appBar,
         body: Row(
@@ -307,7 +287,7 @@ class ResponsiveHelper {
         floatingActionButton: floatingActionButton,
       );
     } else {
-      // Desktop: scaffold with permanent drawer
+      // Десктоп: каркас с постоянной боковой панелью
       return Scaffold(
         appBar: appBar,
         body: Row(
@@ -333,7 +313,7 @@ class ResponsiveHelper {
     }
   }
 
-  /// Get responsive column count for list
+  /// Получить адаптивное количество колонок для списка
   static int getResponsiveColumnCount(BuildContext context) {
     final width = screenWidth(context);
     if (width < mobileBreakpoint) {
@@ -349,7 +329,7 @@ class ResponsiveHelper {
     }
   }
 
-  /// Get responsive dialog width
+  /// Получить адаптивную ширину диалога
   static double responsiveDialogWidth(BuildContext context) {
     final width = screenWidth(context);
     if (isMobile(context)) {

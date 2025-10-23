@@ -17,7 +17,7 @@ import '../../domain/entities/tag.dart';
 class TaskDetailsPage extends StatefulWidget {
   final int taskId;
 
-  const TaskDetailsPage({Key? key, required this.taskId}) : super(key: key);
+  const TaskDetailsPage({super.key, required this.taskId});
 
   @override
   State<TaskDetailsPage> createState() => _TaskDetailsPageState();
@@ -792,7 +792,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage>
       if (isCompleted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('task_details.task_completed'.tr() + ' 🎉'),
+            content: Text('${'task_details.task_completed'.tr()} 🎉'),
             duration: const Duration(seconds: 2),
             backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
@@ -822,7 +822,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage>
     // Show success message
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('task_details.task_completed'.tr() + ' 🎉'),
+        content: Text('${'task_details.task_completed'.tr()} 🎉'),
         duration: const Duration(seconds: 2),
         backgroundColor: Colors.green,
         behavior: SnackBarBehavior.floating,

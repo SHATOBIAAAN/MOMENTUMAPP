@@ -7,9 +7,9 @@ import '../blocs/tag_bloc.dart';
 import '../blocs/tag_state.dart';
 import '../utils/accessibility_helper.dart';
 
-/// TaskCard Widget
-/// Displays a single task with all its information
-/// Supports tap, toggle completion, and delete actions
+/// Виджет TaskCard
+/// Отображает одну задачу со всей её информацией
+/// Поддерживает нажатие, переключение завершения и удаление
 class TaskCard extends StatelessWidget {
   final Task task;
   final VoidCallback? onTap;
@@ -17,12 +17,12 @@ class TaskCard extends StatelessWidget {
   final VoidCallback? onDelete;
 
   const TaskCard({
-    Key? key,
+    super.key,
     required this.task,
     this.onTap,
     this.onToggle,
     this.onDelete,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -52,11 +52,11 @@ class TaskCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Title and checkbox row
+              // Строка с заголовком и чекбоксом
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Checkbox
+                  // Чекбокс
                   Semantics(
                     label: task.isCompleted 
                         ? 'task_card.uncheck_task'.tr(namedArgs: {'title': task.title})
@@ -69,13 +69,13 @@ class TaskCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  // Task content
+                  // Содержимое задачи
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Title
+                        // Заголовок
                         Text(
                           task.title,
                           style: theme.textTheme.titleMedium?.copyWith(
@@ -104,7 +104,7 @@ class TaskCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  // Delete button
+                  // Кнопка удаления
                   Semantics(
                     label: 'task_card.delete_task'.tr(namedArgs: {'title': task.title}),
                     button: true,
@@ -118,7 +118,7 @@ class TaskCard extends StatelessWidget {
                   ),
                 ],
               ),
-              // Progress bar (if task has progress)
+              // Индикатор прогресса (если у задачи есть прогресс)
               if (task.progress != null && task.progress! > 0) ...[
                 const SizedBox(height: 8),
                 Column(
@@ -146,7 +146,7 @@ class TaskCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     LinearProgressIndicator(
                       value: task.progress,
-                      backgroundColor: theme.colorScheme.surfaceVariant,
+                      backgroundColor: theme.colorScheme.surfaceContainerHighest,
                       valueColor: AlwaysStoppedAnimation<Color>(
                         task.isCompleted 
                             ? Colors.green 
@@ -157,12 +157,12 @@ class TaskCard extends StatelessWidget {
                 ),
               ],
               const SizedBox(height: 12),
-              // Task metadata row
+              // Строка с метаданными задачи
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  // Due date chip
+                  // Чип даты дедлайна
                   _buildChip(
                     context: context,
                     icon: isOverdue ? Icons.warning : Icons.calendar_today,
@@ -171,14 +171,14 @@ class TaskCard extends StatelessWidget {
                         ? theme.colorScheme.error
                         : _getDueDateColor(context, task.dueDate),
                   ),
-                  // Priority chip
+                  // Чип приоритета
                   _buildChip(
                     context: context,
                     icon: _getPriorityIcon(task.priority),
                     label: task.priority.displayName,
                     color: _getPriorityColor(context, task.priority),
                   ),
-                  // Category chip
+                  // Чип категории
                   if (task.category != null && task.category!.isNotEmpty)
                     _buildChip(
                       context: context,
@@ -186,7 +186,7 @@ class TaskCard extends StatelessWidget {
                       label: task.category!,
                       color: theme.colorScheme.tertiary,
                     ),
-                  // Tags section
+                  // Блок тегов
                   if (task.tagIds != null && task.tagIds!.isNotEmpty)
                     BlocBuilder<TagBloc, TagState>(
                       builder: (context, state) {
@@ -240,7 +240,7 @@ class TaskCard extends StatelessWidget {
     );
   }
 
-  /// Build metadata chip
+  /// Построить чип для метаданных
   Widget _buildChip({
     required BuildContext context,
     required IconData icon,
@@ -271,7 +271,7 @@ class TaskCard extends StatelessWidget {
     );
   }
 
-  /// Format due date to readable string
+  /// Форматирует дату дедлайна в читаемую строку
   String _formatDueDate(DateTime date) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -290,7 +290,7 @@ class TaskCard extends StatelessWidget {
     }
   }
 
-  /// Get due date color based on how soon it is
+  /// Получает цвет для даты дедлайна в зависимости от близости срока
   Color _getDueDateColor(BuildContext context, DateTime dueDate) {
     final now = DateTime.now();
     final diff = dueDate.difference(now);
@@ -304,7 +304,7 @@ class TaskCard extends StatelessWidget {
     }
   }
 
-  /// Get priority icon
+  /// Получает иконку для приоритета
   IconData _getPriorityIcon(TaskPriority priority) {
     switch (priority) {
       case TaskPriority.low:
@@ -318,7 +318,7 @@ class TaskCard extends StatelessWidget {
     }
   }
 
-  /// Get priority color
+  /// Получает цвет для приоритета
   Color _getPriorityColor(BuildContext context, TaskPriority priority) {
     switch (priority) {
       case TaskPriority.low:
@@ -332,7 +332,7 @@ class TaskCard extends StatelessWidget {
     }
   }
 
-  /// Build tag chip
+  /// Построить чип тега
   Widget _buildTagChip({
     required BuildContext context,
     required Tag tag,
@@ -389,7 +389,7 @@ class TaskCard extends StatelessWidget {
     );
   }
 
-  /// Show tag details popup
+  /// Показать всплывающее окно с деталями тега
   void _showTagDetails(BuildContext context, Tag tag) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -404,7 +404,7 @@ class TaskCard extends StatelessWidget {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Tag color indicator
+            // Индикатор цвета тега
             Container(
               width: 60,
               height: 60,
@@ -426,7 +426,7 @@ class TaskCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            // Tag name
+            // Название тега
             Text(
               tag.name,
               style: TextStyle(
@@ -436,7 +436,7 @@ class TaskCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            // Tag usage count
+            // Количество использований тега
             Text(
               'task_card.used_count'.tr(namedArgs: {'count': tag.usageCount.toString()}),
               style: TextStyle(
@@ -445,7 +445,7 @@ class TaskCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 4),
-            // Created date
+            // Дата создания
             Text(
               'task_card.created'.tr(namedArgs: {'date': _formatDate(tag.createdAt)}),
               style: TextStyle(
@@ -471,7 +471,7 @@ class TaskCard extends StatelessWidget {
     );
   }
 
-  /// Format date for display
+  /// Форматирует дату для отображения
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     final difference = now.difference(date).inDays;

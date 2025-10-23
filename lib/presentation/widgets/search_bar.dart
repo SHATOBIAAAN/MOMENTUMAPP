@@ -7,11 +7,11 @@ class SearchBar extends StatefulWidget {
   final bool isDark;
 
   const SearchBar({
-    Key? key,
+    super.key,
     required this.hintText,
     required this.onChanged,
     required this.isDark,
-  }) : super(key: key);
+  });
 
   @override
   State<SearchBar> createState() => _SearchBarState();

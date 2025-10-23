@@ -1,17 +1,13 @@
 import '../entities/workspace.dart';
 import '../repositories/workspace_repository.dart';
 
-/// Update Workspace Use Case
-/// Updates an existing workspace in the repository
 class UpdateWorkspaceUseCase {
   final WorkspaceRepository _repository;
 
   UpdateWorkspaceUseCase(this._repository);
 
-  /// Execute the use case
   Future<Workspace> call(Workspace workspace) async {
     try {
-      // Validate workspace data
       if (workspace.name.trim().isEmpty) {
         throw Exception('Workspace name cannot be empty');
       }

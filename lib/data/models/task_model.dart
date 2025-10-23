@@ -1,7 +1,7 @@
 import '../../domain/entities/task.dart';
 
-/// Task Model for SQLite Database
-/// This is the data layer representation of a Task
+/// Модель задачи для SQLite базы данных
+/// Это представление задачи на уровне данных
 class TaskModel {
   int id;
 
@@ -25,9 +25,9 @@ class TaskModel {
 
   int? estimatedHours;
 
-  String? tagIds; // JSON string for SQLite
+  String? tagIds; // JSON строка для SQLite
 
-  /// Default constructor
+  /// Конструктор по умолчанию
   TaskModel({
     required this.id,
     required this.title,
@@ -43,7 +43,7 @@ class TaskModel {
     this.tagIds,
   });
 
-  /// Constructor from domain entity
+  /// Конструктор из доменной сущности
   TaskModel.fromEntity(Task task) 
     : id = task.id,
       title = task.title,
@@ -58,7 +58,7 @@ class TaskModel {
       estimatedHours = task.estimatedHours,
       tagIds = task.tagIds?.join(',');
 
-  /// Update existing model with new data
+  /// Обновить существующую модель новыми данными
   void updateFromEntity(Task task) {
     title = task.title;
     description = task.description;
@@ -72,7 +72,7 @@ class TaskModel {
     tagIds = task.tagIds?.join(',');
   }
 
-  /// Convert model to domain entity
+  /// Преобразовать модель в доменную сущность
   Task toEntity() {
     return Task(
       id: id,
@@ -91,7 +91,7 @@ class TaskModel {
     );
   }
 
-  /// Create a new task model for insertion
+  /// Создать новую модель задачи для вставки
   factory TaskModel.create({
     required String title,
     String? description,
@@ -104,7 +104,7 @@ class TaskModel {
     List<int>? tagIds,
   }) {
     return TaskModel(
-      id: 0, // Will be set by database
+      id: 0, // Будет установлено базой данных
       title: title,
       description: description,
       dueDate: dueDate,
@@ -119,7 +119,7 @@ class TaskModel {
     );
   }
 
-  /// Copy with method for updates
+  /// Метод копирования для обновлений
   TaskModel copyWith({
     int? id,
     String? title,
@@ -150,7 +150,7 @@ class TaskModel {
     );
   }
 
-  /// Convert to Map for SQLite
+  /// Преобразовать в Map для SQLite
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -168,7 +168,7 @@ class TaskModel {
     };
   }
 
-  /// Create from Map (SQLite result)
+  /// Создать из Map (результат SQLite)
   factory TaskModel.fromMap(Map<String, dynamic> map) {
     return TaskModel(
       id: map['id'] as int,

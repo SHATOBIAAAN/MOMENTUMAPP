@@ -10,7 +10,7 @@ import '../utils/accessibility_helper.dart';
 class GitHubSyncPage extends StatefulWidget {
   final GitHubSyncService? githubSyncService;
   
-  const GitHubSyncPage({Key? key, this.githubSyncService}) : super(key: key);
+  const GitHubSyncPage({super.key, this.githubSyncService});
 
   @override
   State<GitHubSyncPage> createState() => _GitHubSyncPageState();
@@ -336,7 +336,7 @@ class _GitHubSyncPageState extends State<GitHubSyncPage> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   elevation: 2,
-                  shadowColor: const Color(0xFF137FEC).withOpacity(0.3),
+                  shadowColor: const Color(0xFF137FEC).withValues(alpha: 0.3),
                 ),
               ),
             ),

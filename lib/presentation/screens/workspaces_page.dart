@@ -8,10 +8,8 @@ import '../blocs/workspace_event.dart';
 import '../blocs/workspace_state.dart';
 import 'create_workspace_screen.dart';
 
-/// Workspaces Page
-/// Displays list of workspaces with management options
 class WorkspacesPage extends StatefulWidget {
-  const WorkspacesPage({Key? key}) : super(key: key);
+  const WorkspacesPage({super.key});
 
   @override
   State<WorkspacesPage> createState() => _WorkspacesPageState();
@@ -21,7 +19,6 @@ class _WorkspacesPageState extends State<WorkspacesPage> {
   @override
   void initState() {
     super.initState();
-    // Load workspaces when the page is first opened
     context.read<WorkspaceBloc>().add(const LoadWorkspacesEvent());
   }
 
@@ -42,7 +39,6 @@ class _WorkspacesPageState extends State<WorkspacesPage> {
       ),
       body: BlocConsumer<WorkspaceBloc, WorkspaceState>(
         listener: (context, state) {
-          // Show snackbar for operations
           if (state is WorkspaceOperationSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -92,7 +88,6 @@ class _WorkspacesPageState extends State<WorkspacesPage> {
     );
   }
 
-  /// Build workspaces list view
   Widget _buildWorkspacesList(List<Workspace> workspaces) {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
@@ -103,7 +98,6 @@ class _WorkspacesPageState extends State<WorkspacesPage> {
     );
   }
 
-  /// Build workspace card
   Widget _buildWorkspaceCard(Workspace workspace) {
     final theme = Theme.of(context);
     final color = _parseColor(workspace.colorHex);
@@ -117,7 +111,6 @@ class _WorkspacesPageState extends State<WorkspacesPage> {
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              // Icon
               Container(
                 width: 48,
                 height: 48,
@@ -133,7 +126,6 @@ class _WorkspacesPageState extends State<WorkspacesPage> {
               ),
               const SizedBox(width: 16),
               
-              // Content
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -174,7 +166,6 @@ class _WorkspacesPageState extends State<WorkspacesPage> {
                 ),
               ),
               
-              // Actions
               PopupMenuButton<String>(
                 onSelected: (value) {
                   if (value == 'edit') {
@@ -213,7 +204,6 @@ class _WorkspacesPageState extends State<WorkspacesPage> {
     );
   }
 
-  /// Build stat chip
   Widget _buildStatChip(String text, ThemeData theme) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -230,7 +220,6 @@ class _WorkspacesPageState extends State<WorkspacesPage> {
     );
   }
 
-  /// Build empty state
   Widget _buildEmptyState(String message) {
     return Center(
       child: Column(
@@ -261,7 +250,6 @@ class _WorkspacesPageState extends State<WorkspacesPage> {
     );
   }
 
-  /// Build error state
   Widget _buildErrorState(String message) {
     return Center(
       child: Column(
@@ -300,7 +288,6 @@ class _WorkspacesPageState extends State<WorkspacesPage> {
     );
   }
 
-  /// Navigate to create workspace page
   Future<void> _navigateToCreateWorkspace() async {
     final result = await Navigator.push(
       context,
@@ -312,7 +299,6 @@ class _WorkspacesPageState extends State<WorkspacesPage> {
       ),
     );
 
-    // Reload workspaces if a workspace was created
     if (result == true) {
       if (mounted) {
         context.read<WorkspaceBloc>().add(const LoadWorkspacesEvent());
@@ -320,9 +306,7 @@ class _WorkspacesPageState extends State<WorkspacesPage> {
     }
   }
 
-  /// Select workspace
   void _selectWorkspace(Workspace workspace) {
-    // TODO: Navigate to workspace tasks
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('workspaces_page.workspace_selected'.tr(namedArgs: {'name': workspace.name})),
@@ -330,15 +314,12 @@ class _WorkspacesPageState extends State<WorkspacesPage> {
     );
   }
 
-  /// Edit workspace
   void _editWorkspace(Workspace workspace) {
-    // TODO: Navigate to edit workspace
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('workspaces_page.edit_coming_soon'.tr())),
     );
   }
 
-  /// Delete workspace
   void _deleteWorkspace(Workspace workspace) {
     showDialog(
       context: context,
@@ -366,7 +347,6 @@ class _WorkspacesPageState extends State<WorkspacesPage> {
     );
   }
 
-  /// Parse color from hex string
   Color _parseColor(String hexColor) {
     try {
       final hex = hexColor.replaceAll('#', '');
@@ -376,9 +356,7 @@ class _WorkspacesPageState extends State<WorkspacesPage> {
     }
   }
 
-  /// Get icon data from icon name
   IconData _getIconData(String iconName) {
-    // Handle empty or null iconName
     if (iconName.isEmpty) {
       return Icons.workspace_premium;
     }
@@ -421,7 +399,6 @@ class _WorkspacesPageState extends State<WorkspacesPage> {
         return Icons.workspace_premium;
       }
     } catch (e) {
-      // If any error occurs, return default icon
       return Icons.workspace_premium;
     }
   }

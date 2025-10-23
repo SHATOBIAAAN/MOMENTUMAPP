@@ -12,9 +12,6 @@ import '../../core/app_state_provider.dart';
 import 'task_event.dart';
 import 'task_state.dart';
 
-/// Task BLoC - Business Logic Component for task management
-/// Handles all task-related events and emits corresponding states
-/// Follows BLoC pattern with Clean Architecture
 class TaskBloc extends Bloc<TaskEvent, TaskState> {
   final GetAllTasksUseCase getAllTasksUseCase;
   final GetTasksByWorkspaceIdUseCase getTasksByWorkspaceIdUseCase;
@@ -35,7 +32,6 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     required this.tagRepository,
     required this.appStateProvider,
   }) : super(const TaskInitial()) {
-    // Register event handlers
     on<LoadTasksEvent>(_onLoadTasks);
     on<LoadTasksByWorkspaceEvent>(_onLoadTasksByWorkspace);
     on<LoadFilteredTasksEvent>(_onLoadFilteredTasks);

@@ -20,7 +20,7 @@ class CreateTaskPage extends StatefulWidget {
   final int? taskId; // For editing existing task
   final int workspaceId;
 
-  const CreateTaskPage({Key? key, this.task, this.taskId, required this.workspaceId}) : super(key: key);
+  const CreateTaskPage({super.key, this.task, this.taskId, required this.workspaceId});
 
   @override
   State<CreateTaskPage> createState() => _CreateTaskPageState();

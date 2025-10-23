@@ -1,40 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 
-/// Helper class for accessibility features
-/// Provides utilities for screen readers, text scaling, and accessibility
+/// Вспомогательный класс для функций доступности
+/// Предоставляет утилиты для экранных читалок, масштабирования текста и доступности
 class AccessibilityHelper {
   AccessibilityHelper._();
 
-  /// Minimum touch target size (48x48 as per Material Design)
+  /// Минимальный размер области касания (48x48 согласно Material Design)
   static const double minTouchTargetSize = 48.0;
 
-  /// Check if screen reader is enabled
+  /// Проверить, включен ли экранный читатель
   static bool isScreenReaderEnabled(BuildContext context) {
     return MediaQuery.of(context).accessibleNavigation;
   }
 
-  /// Get text scale factor
+  /// Получить коэффициент масштабирования текста
   static double getTextScaleFactor(BuildContext context) {
     return MediaQuery.of(context).textScaler.scale(1.0);
   }
 
-  /// Check if text is scaled
+  /// Проверить, масштабирован ли текст
   static bool isTextScaled(BuildContext context) {
     return MediaQuery.of(context).textScaler.scale(1.0) > 1.0;
   }
 
-  /// Check if bold text is enabled (iOS)
+  /// Проверить, включен ли жирный текст (iOS)
   static bool isBoldTextEnabled(BuildContext context) {
     return MediaQuery.of(context).boldText;
   }
 
-  /// Check if reduce motion is enabled
+  /// Проверить, включено ли уменьшение движения
   static bool isReduceMotionEnabled(BuildContext context) {
     return MediaQuery.of(context).disableAnimations;
   }
 
-  /// Get accessible text size
+  /// Получить доступный размер текста
   static double getAccessibleTextSize(BuildContext context, double baseSize) {
     final textScaleFactor = getTextScaleFactor(context);
     return baseSize * textScaleFactor;

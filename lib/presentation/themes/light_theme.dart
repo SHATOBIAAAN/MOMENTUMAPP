@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
 
-/// Light Theme for the app using Material 3
-/// Clean, modern, and minimalistic design
 ThemeData lightTheme() {
   return ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
-
-    // Color Scheme
     colorScheme: ColorScheme.light(
       primary: const Color(0xFF6750A4),
       onPrimary: Colors.white,
@@ -47,7 +43,6 @@ ThemeData lightTheme() {
       surfaceTint: const Color(0xFF6750A4),
     ),
 
-    // App Bar Theme
     appBarTheme: const AppBarTheme(
       centerTitle: false,
       elevation: 0,
@@ -62,7 +57,6 @@ ThemeData lightTheme() {
       ),
     ),
 
-    // Card Theme
     cardTheme: CardThemeData(
       elevation: 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -70,7 +64,6 @@ ThemeData lightTheme() {
       surfaceTintColor: const Color(0xFF6750A4),
     ),
 
-    // Floating Action Button Theme
     floatingActionButtonTheme: FloatingActionButtonThemeData(
       backgroundColor: const Color(0xFF6750A4),
       foregroundColor: Colors.white,
@@ -78,7 +71,6 @@ ThemeData lightTheme() {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     ),
 
-    // Input Decoration Theme
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: const Color(0xFFE7E0EC),
@@ -106,7 +98,6 @@ ThemeData lightTheme() {
       hintStyle: const TextStyle(color: Color(0xFF79747E)),
     ),
 
-    // Elevated Button Theme
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: const Color(0xFF6750A4),
@@ -122,7 +113,6 @@ ThemeData lightTheme() {
       ),
     ),
 
-    // Text Button Theme
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
         foregroundColor: const Color(0xFF6750A4),
@@ -136,7 +126,6 @@ ThemeData lightTheme() {
       ),
     ),
 
-    // Outlined Button Theme
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         foregroundColor: const Color(0xFF6750A4),
@@ -151,7 +140,6 @@ ThemeData lightTheme() {
       ),
     ),
 
-    // Checkbox Theme
     checkboxTheme: CheckboxThemeData(
       fillColor: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {
@@ -163,7 +151,6 @@ ThemeData lightTheme() {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
     ),
 
-    // Switch Theme
     switchTheme: SwitchThemeData(
       thumbColor: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {
@@ -179,7 +166,6 @@ ThemeData lightTheme() {
       }),
     ),
 
-    // Dialog Theme
     dialogTheme: DialogThemeData(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
       elevation: 3,
@@ -191,7 +177,6 @@ ThemeData lightTheme() {
       ),
     ),
 
-    // Bottom Sheet Theme
     bottomSheetTheme: const BottomSheetThemeData(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
@@ -200,7 +185,6 @@ ThemeData lightTheme() {
       elevation: 3,
     ),
 
-    // Chip Theme
     chipTheme: ChipThemeData(
       backgroundColor: const Color(0xFFE7E0EC),
       deleteIconColor: const Color(0xFF49454F),
@@ -222,17 +206,14 @@ ThemeData lightTheme() {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
     ),
 
-    // Divider Theme
     dividerTheme: const DividerThemeData(
       color: Color(0xFFCAC4D0),
       thickness: 1,
       space: 1,
     ),
 
-    // Icon Theme
     iconTheme: const IconThemeData(color: Color(0xFF49454F), size: 24),
 
-    // Text Theme
     textTheme: const TextTheme(
       displayLarge: TextStyle(
         fontSize: 57,
@@ -326,7 +307,6 @@ ThemeData lightTheme() {
       ),
     ),
 
-    // Snack Bar Theme
     snackBarTheme: SnackBarThemeData(
       backgroundColor: const Color(0xFF313033),
       contentTextStyle: const TextStyle(color: Color(0xFFF4EFF4)),

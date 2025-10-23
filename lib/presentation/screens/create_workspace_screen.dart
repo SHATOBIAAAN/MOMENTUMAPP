@@ -11,7 +11,7 @@ import '../blocs/workspace_state.dart';
 class CreateWorkspaceScreen extends StatefulWidget {
   final int? workspaceId; // For editing existing workspace
   
-  const CreateWorkspaceScreen({Key? key, this.workspaceId}) : super(key: key);
+  const CreateWorkspaceScreen({super.key, this.workspaceId});
 
   @override
   State<CreateWorkspaceScreen> createState() => _CreateWorkspaceScreenState();

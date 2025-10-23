@@ -9,7 +9,7 @@ import '../blocs/tag_event.dart';
 class CreateTagPage extends StatefulWidget {
   final Tag? tag; // For editing existing tag
   
-  const CreateTagPage({Key? key, this.tag}) : super(key: key);
+  const CreateTagPage({super.key, this.tag});
 
   @override
   State<CreateTagPage> createState() => _CreateTagPageState();

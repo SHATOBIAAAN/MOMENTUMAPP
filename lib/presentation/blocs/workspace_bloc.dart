@@ -8,8 +8,6 @@ import '../../domain/repositories/workspace_repository.dart';
 import 'workspace_event.dart';
 import 'workspace_state.dart';
 
-/// Workspace BLoC - Business Logic Component for workspace management
-/// Handles all workspace-related events and emits corresponding states
 class WorkspaceBloc extends Bloc<WorkspaceEvent, WorkspaceState> {
   final GetAllWorkspacesUseCase getAllWorkspacesUseCase;
   final CreateWorkspaceUseCase createWorkspaceUseCase;
@@ -24,7 +22,6 @@ class WorkspaceBloc extends Bloc<WorkspaceEvent, WorkspaceState> {
     required this.deleteWorkspaceUseCase,
     required this.workspaceRepository,
   }) : super(const WorkspaceInitial()) {
-    // Register event handlers
     on<LoadWorkspacesEvent>(_onLoadWorkspaces);
     on<CreateWorkspaceEvent>(_onCreateWorkspace);
     on<UpdateWorkspaceEvent>(_onUpdateWorkspace);

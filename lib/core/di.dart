@@ -29,9 +29,9 @@ import '../presentation/blocs/workspace_bloc.dart';
 import '../presentation/blocs/tag_bloc.dart';
 import 'app_state_provider.dart';
 
-/// Dependency Injection Container
-/// Manages all app dependencies using a simple service locator pattern
-/// Initializes SQLite database and provides instances of repositories, use cases, and BLoCs
+/// Контейнер внедрения зависимостей
+/// Управляет всеми зависимостями приложения используя простой паттерн service locator
+/// Инициализирует SQLite базу данных и предоставляет экземпляры репозиториев, use cases и BLoCs
 class DI {
   static late Database _database;
   static late TaskLocalDataSource _taskLocalDataSource;
@@ -54,12 +54,12 @@ class DI {
   static late DeleteWorkspaceUseCase _deleteWorkspaceUseCase;
   static late DeleteTagUseCase _deleteTagUseCase;
 
-  /// Initialize all dependencies
-  /// Must be called before using any dependencies
+  /// Инициализирует все зависимости
+  /// Должен быть вызван перед использованием любых зависимостей
   static Future<void> init() async {
     try {
-      debugPrint('DI: Initializing SQLite database...');
-      // Initialize SQLite database
+      debugPrint('DI: Инициализация SQLite базы данных...');
+      // Инициализация SQLite базы данных
       final dir = await getApplicationDocumentsDirectory();
       final path = join(dir.path, 'momentum.db');
       _database = await openDatabase(
@@ -68,21 +68,21 @@ class DI {
         onCreate: _createDatabase,
         onUpgrade: _upgradeDatabase,
       );
-      debugPrint('DI: Database initialized successfully');
+      debugPrint('DI: База данных успешно инициализирована');
     } catch (e) {
-      debugPrint('DI: Failed to initialize database: $e');
+      debugPrint('DI: Ошибка инициализации базы данных: $e');
       rethrow;
     }
 
-    // Initialize data sources
-    debugPrint('DI: Initializing data sources...');
+    // Инициализация источников данных
+    debugPrint('DI: Инициализация источников данных...');
     _taskLocalDataSource = TaskLocalDataSource(_database);
     _workspaceLocalDataSource = WorkspaceLocalDataSource(_database);
     _tagLocalDataSource = TagLocalDataSourceImpl(_database);
-    debugPrint('DI: Data sources initialized');
+    debugPrint('DI: Источники данных инициализированы');
 
-    // Initialize repositories
-    debugPrint('DI: Initializing repositories...');
+    // Инициализация репозиториев
+    debugPrint('DI: Инициализация репозиториев...');
     _workspaceRepository = WorkspaceRepositoryImpl(localDataSource: _workspaceLocalDataSource);
     _taskRepository = TaskRepositoryImpl(
       localDataSource: _taskLocalDataSource,
@@ -90,9 +90,9 @@ class DI {
     );
     _tagRepository = TagRepositoryImpl(localDataSource: _tagLocalDataSource);
     _appStateProvider = AppStateProvider();
-    debugPrint('DI: Repositories initialized');
+    debugPrint('DI: Репозитории инициализированы');
 
-    // Initialize use cases
+    // Инициализация use cases
     _getAllTasksUseCase = GetAllTasksUseCase(_taskRepository);
     _getAllWorkspacesUseCase = GetAllWorkspacesUseCase(_workspaceRepository);
     _getAllTagsUseCase = GetAllTagsUseCase(_tagRepository);
@@ -106,21 +106,21 @@ class DI {
     _deleteWorkspaceUseCase = DeleteWorkspaceUseCase(_workspaceRepository, _taskRepository);
     _deleteTagUseCase = DeleteTagUseCase(_tagRepository);
 
-    // Initialize seed data if database is empty (disabled for now)
+    // Инициализация начальных данных если база данных пуста (отключено)
     // await _initializeSeedData();
   }
 
-  /// Upgrade database
+  /// Обновление базы данных
   static Future<void> _upgradeDatabase(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
-      // Fix null order values in existing workspaces
+      // Исправление null значений order в существующих рабочих пространствах
       await db.execute('UPDATE workspaces SET `order` = 0 WHERE `order` IS NULL');
     }
   }
 
-  /// Create database tables
+  /// Создание таблиц базы данных
   static Future<void> _createDatabase(Database db, int version) async {
-    // Create tasks table
+    // Создание таблицы задач
     await db.execute('''
       CREATE TABLE tasks (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -138,7 +138,7 @@ class DI {
       )
     ''');
 
-    // Create workspaces table
+    // Создание таблицы рабочих пространств
     await db.execute('''
       CREATE TABLE workspaces (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -153,7 +153,7 @@ class DI {
       )
     ''');
 
-    // Create tags table
+    // Создание таблицы тегов
     await db.execute('''
       CREATE TABLE tags (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -165,68 +165,68 @@ class DI {
     ''');
   }
 
-  /// Get Database instance
+  /// Получить экземпляр базы данных
   static Database get database => _database;
 
-  /// Get Task Local Data Source
+  /// Получить локальный источник данных задач
   static TaskLocalDataSource get taskLocalDataSource => _taskLocalDataSource;
 
-  /// Get Workspace Local Data Source
+  /// Получить локальный источник данных рабочих пространств
   static WorkspaceLocalDataSource get workspaceLocalDataSource => _workspaceLocalDataSource;
 
-  /// Get Tag Local Data Source
+  /// Получить локальный источник данных тегов
   static TagLocalDataSource get tagLocalDataSource => _tagLocalDataSource;
 
-  /// Get Task Repository
+  /// Получить репозиторий задач
   static TaskRepository get taskRepository => _taskRepository;
 
-  /// Get Workspace Repository
+  /// Получить репозиторий рабочих пространств
   static WorkspaceRepository get workspaceRepository => _workspaceRepository;
 
-  /// Get Tag Repository
+  /// Получить репозиторий тегов
   static TagRepository get tagRepository => _tagRepository;
 
-  /// Get App State Provider
+  /// Получить провайдер состояния приложения
   static AppStateProvider get appStateProvider => _appStateProvider;
 
-  /// Get All Tasks Use Case
+  /// Получить use case получения всех задач
   static GetAllTasksUseCase get getAllTasksUseCase => _getAllTasksUseCase;
 
-  /// Get All Workspaces Use Case
+  /// Получить use case получения всех рабочих пространств
   static GetAllWorkspacesUseCase get getAllWorkspacesUseCase => _getAllWorkspacesUseCase;
 
-  /// Get All Tags Use Case
+  /// Получить use case получения всех тегов
   static GetAllTagsUseCase get getAllTagsUseCase => _getAllTagsUseCase;
 
-  /// Get Tasks By Workspace ID Use Case
+  /// Получить use case получения задач по ID рабочего пространства
   static GetTasksByWorkspaceIdUseCase get getTasksByWorkspaceIdUseCase => _getTasksByWorkspaceIdUseCase;
 
-  /// Get Create Task Use Case
+  /// Получить use case создания задачи
   static CreateTaskUseCase get createTaskUseCase => _createTaskUseCase;
 
-  /// Get Create Workspace Use Case
+  /// Получить use case создания рабочего пространства
   static CreateWorkspaceUseCase get createWorkspaceUseCase => _createWorkspaceUseCase;
 
-  /// Get Create Tag Use Case
+  /// Получить use case создания тега
   static CreateTagUseCase get createTagUseCase => _createTagUseCase;
 
-  /// Get Update Task Use Case
+  /// Получить use case обновления задачи
   static UpdateTaskUseCase get updateTaskUseCase => _updateTaskUseCase;
 
-  /// Get Update Workspace Use Case
+  /// Получить use case обновления рабочего пространства
   static UpdateWorkspaceUseCase get updateWorkspaceUseCase => _updateWorkspaceUseCase;
 
-  /// Get Delete Task Use Case
+  /// Получить use case удаления задачи
   static DeleteTaskUseCase get deleteTaskUseCase => _deleteTaskUseCase;
 
-  /// Get Delete Workspace Use Case
+  /// Получить use case удаления рабочего пространства
   static DeleteWorkspaceUseCase get deleteWorkspaceUseCase => _deleteWorkspaceUseCase;
 
-  /// Get Delete Tag Use Case
+  /// Получить use case удаления тега
   static DeleteTagUseCase get deleteTagUseCase => _deleteTagUseCase;
 
-  /// Create Task BLoC instance
-  /// Creates a new instance each time (for BlocProvider)
+  /// Создать экземпляр Task BLoC
+  /// Создает новый экземпляр каждый раз (для BlocProvider)
   static TaskBloc createTaskBloc() {
     return TaskBloc(
       getAllTasksUseCase: _getAllTasksUseCase,
@@ -240,8 +240,8 @@ class DI {
     );
   }
 
-  /// Create Workspace BLoC instance
-  /// Creates a new instance each time (for BlocProvider)
+  /// Создать экземпляр Workspace BLoC
+  /// Создает новый экземпляр каждый раз (для BlocProvider)
   static WorkspaceBloc createWorkspaceBloc() {
     return WorkspaceBloc(
       getAllWorkspacesUseCase: _getAllWorkspacesUseCase,
@@ -252,8 +252,8 @@ class DI {
     );
   }
 
-  /// Create Tag BLoC instance
-  /// Creates a new instance each time (for BlocProvider)
+  /// Создать экземпляр Tag BLoC
+  /// Создает новый экземпляр каждый раз (для BlocProvider)
   static TagBloc createTagBloc() {
     return TagBloc(
       getAllTagsUseCase: _getAllTagsUseCase,
@@ -263,8 +263,8 @@ class DI {
   }
 
 
-  /// Dispose resources
-  /// Call this when the app is closing
+  /// Освобождение ресурсов
+  /// Вызывать при закрытии приложения
   static Future<void> dispose() async {
     await _database.close();
   }

@@ -14,10 +14,8 @@ import '../blocs/task_state.dart';
 import '../widgets/workspace_card.dart';
 import '../utils/responsive_helper.dart';
 
-/// HomePage - Main screen of the app
-/// Displays workspace cards with progress and task management
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -32,7 +30,6 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    // Load workspaces when the page is first opened
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         context.read<WorkspaceBloc>().add(const LoadWorkspacesEvent());
@@ -57,10 +54,8 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
                   children: [
-            // Top App Bar
             _buildTopAppBar(theme, isDark),
             const SizedBox(height: 16),
-            // Search Bar (conditional)
             Consumer<AppStateProvider>(
               builder: (context, appState, child) {
                 return appState.showSearch
@@ -164,13 +159,10 @@ class _HomePageState extends State<HomePage> {
                     : const SizedBox(height: 20);
               },
             ),
-            // Workspace Cards
             Expanded(
               child: BlocListener<TaskBloc, TaskState>(
                 listener: (context, state) {
-                  // Update workspace statistics when tasks change
                   if (state is TaskOperationSuccess || state is TaskLoaded) {
-                    // Reload workspaces to update statistics
                     context.read<WorkspaceBloc>().add(const LoadWorkspacesEvent());
                   }
                 },
@@ -210,7 +202,6 @@ class _HomePageState extends State<HomePage> {
                         ? state.workspaces
                         : (state as WorkspaceOperationSuccess).workspaces;
                     
-                    // Apply search filter if there's a search query
                     final filteredWorkspaces = _showSearchResults 
                         ? _filterWorkspaces(workspaces, _searchQuery)
                         : workspaces;
@@ -234,7 +225,6 @@ class _HomePageState extends State<HomePage> {
       padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
-          // App Logo and Title
           Row(
             children: [
               Container(
@@ -261,10 +251,8 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
           const Spacer(),
-          // Theme toggle, View mode and Avatar
           Row(
             children: [
-              // View mode toggle button with animation
               Consumer<AppStateProvider>(
                 builder: (context, appState, child) {
                   return TweenAnimationBuilder<double>(
@@ -312,7 +300,6 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
               const SizedBox(width: 8),
-              // Theme toggle button
               Consumer<ThemeProvider>(
                 builder: (context, themeProvider, child) {
                   return GestureDetector(
@@ -334,7 +321,6 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
               const SizedBox(width: 8),
-              // Avatar
               GestureDetector(
                 onTap: () => context.go('/settings'),
                 child: Container(
@@ -364,7 +350,6 @@ class _HomePageState extends State<HomePage> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-            // Workspace Grid/List with transition animation
         Expanded(
               child: ResponsiveHelper.responsiveContainer(
                 context: context,
@@ -397,7 +382,6 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-            // Create Workspace Button (only when workspaces exist)
             if (workspaces.isNotEmpty) ...[
               const SizedBox(height: 20),
               _buildCreateWorkspaceButton(theme),
@@ -409,7 +393,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  /// Build grid view for workspaces
   Widget _buildGridView(List<Workspace> workspaces, ThemeData theme, bool isDark) {
     return ResponsiveHelper.responsiveBuilder(
       context,
@@ -419,7 +402,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  /// Build mobile grid view (2 columns)
   Widget _buildMobileGridView(List<Workspace> workspaces, ThemeData theme, bool isDark) {
     return GridView.builder(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -440,7 +422,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  /// Build tablet grid view (3 columns)
   Widget _buildTabletGridView(List<Workspace> workspaces, ThemeData theme, bool isDark) {
     return GridView.builder(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -461,7 +442,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  /// Build desktop grid view (4 columns)
   Widget _buildDesktopGridView(List<Workspace> workspaces, ThemeData theme, bool isDark) {
     return GridView.builder(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -483,7 +463,6 @@ class _HomePageState extends State<HomePage> {
   }
 
 
-  /// Build list view for workspaces
   Widget _buildListView(List<Workspace> workspaces, ThemeData theme, bool isDark) {
     return ListView.builder(
       itemCount: workspaces.length,
@@ -494,7 +473,6 @@ class _HomePageState extends State<HomePage> {
           tween: Tween(begin: 0.0, end: 1.0),
           curve: Curves.easeOutBack,
           builder: (context, value, child) {
-            // Clamp the value to ensure it's between 0.0 and 1.0
             final clampedValue = value.clamp(0.0, 1.0);
             return Transform.translate(
               offset: Offset(0, 50 * (1 - clampedValue)),
@@ -737,7 +715,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _showWorkspaceOptions(Workspace workspace) {
-    // Check if modal is already open
     if (ModalRoute.of(context)?.isCurrent != true) return;
     
     showModalBottomSheet(
@@ -756,7 +733,6 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-            // Handle bar
             Container(
               width: 40,
               height: 4,
@@ -766,7 +742,6 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             const SizedBox(height: 20),
-            // Workspace info
             Row(
               children: [
                 Container(
@@ -808,7 +783,6 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
             const SizedBox(height: 30),
-            // Options
             _buildOptionTile(
               icon: Icons.task_alt,
               title: 'home.open_tasks'.tr(),
@@ -865,7 +839,6 @@ class _HomePageState extends State<HomePage> {
 
 
 
-  /// Build workspace card for list view
   Widget _buildWorkspaceListCard(Workspace workspace, ThemeData theme, bool isDark) {
     return WorkspaceCard(
       workspace: workspace,
@@ -876,7 +849,6 @@ class _HomePageState extends State<HomePage> {
   }
 
 
-  /// Filter workspaces based on search query
   List<Workspace> _filterWorkspaces(List<Workspace> workspaces, String query) {
     if (query.isEmpty) return workspaces;
     
@@ -886,19 +858,16 @@ class _HomePageState extends State<HomePage> {
     }).toList();
   }
 
-  /// Safely parse color from hex string with fallback
   Color _parseColor(String hexColor) {
     try {
       String cleanHex = hexColor.replaceFirst('#', '');
       
-      // Add alpha if not present (assume FF for full opacity)
       if (cleanHex.length == 6) {
         cleanHex = 'FF$cleanHex';
       }
       
       return Color(int.parse(cleanHex, radix: 16));
     } catch (e) {
-      // Return default color if parsing fails
       return const Color(0xFF137FEC);
     }
   }

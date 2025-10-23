@@ -1,34 +1,26 @@
 /// WorkspaceModel - Data model for workspace entity
 /// Represents a workspace in the SQLite database
 class WorkspaceModel {
-  /// Unique identifier
   int id;
 
-  /// Workspace name
   String name;
 
-  /// Optional description
   String? description;
 
-  /// Icon name for the workspace
   String iconName;
 
-  /// Color hex code for the workspace
   String colorHex;
 
-  /// Creation timestamp
+
   DateTime createdAt;
 
-  /// Order for sorting workspaces
+
   int order;
 
-  /// Total number of tasks in this workspace
   int totalTasks;
 
-  /// Number of completed tasks in this workspace
   int completedTasks;
 
-  /// Default constructor
   WorkspaceModel({
     required this.id,
     required this.name,
@@ -41,7 +33,6 @@ class WorkspaceModel {
     this.completedTasks = 0,
   });
 
-  /// Named constructor with all parameters
   WorkspaceModel.create({
     required this.name,
     this.description,
@@ -50,7 +41,7 @@ class WorkspaceModel {
     required this.order,
     this.totalTasks = 0,
     this.completedTasks = 0,
-  }) : id = 0, // Will be set by database
+  }) : id = 0,
        createdAt = DateTime.now();
 
   /// Copy with method

@@ -1,70 +1,49 @@
 import 'package:flutter/material.dart';
 
-/// Paginated list view widget for efficient loading of large lists
-/// Supports lazy loading, pull-to-refresh, and error handling
 class PaginatedListView<T> extends StatefulWidget {
-  /// Items to display
   final List<T> items;
 
-  /// Builder for individual items
   final Widget Function(BuildContext context, T item, int index) itemBuilder;
 
-  /// Callback when more items need to be loaded
+
   final Future<List<T>> Function(int page)? onLoadMore;
 
-  /// Callback for pull-to-refresh
   final Future<void> Function()? onRefresh;
 
-  /// Whether there are more items to load
   final bool hasMore;
 
-  /// Whether currently loading
   final bool isLoading;
 
-  /// Error message if any
   final String? errorMessage;
 
-  /// Callback when load more fails
   final VoidCallback? onRetry;
 
-  /// Items per page
   final int itemsPerPage;
 
-  /// Scroll controller
   final ScrollController? scrollController;
 
-  /// Padding for the list
   final EdgeInsetsGeometry? padding;
 
-  /// Separator between items
   final Widget? separator;
 
-  /// Empty state widget
   final Widget? emptyWidget;
 
-  /// Loading widget
   final Widget? loadingWidget;
 
-  /// Error widget builder
   final Widget Function(String error, VoidCallback? onRetry)? errorBuilder;
 
-  /// Physics for the scroll view
   final ScrollPhysics? physics;
 
-  /// Whether to show loading indicator at bottom
   final bool showBottomLoader;
 
-  /// Threshold for loading more (0.0 - 1.0)
   final double loadMoreThreshold;
 
-  /// Whether to shrink wrap the list
   final bool shrinkWrap;
 
-  /// Primary scroll view
   final bool primary;
 
   const PaginatedListView({
-    Key? key,
+    super.key,
     required this.items,
     required this.itemBuilder,
     this.onLoadMore,
@@ -85,7 +64,7 @@ class PaginatedListView<T> extends StatefulWidget {
     this.loadMoreThreshold = 0.8,
     this.shrinkWrap = false,
     this.primary = true,
-  }) : super(key: key);
+  });
 
   @override
   State<PaginatedListView<T>> createState() => _PaginatedListViewState<T>();
@@ -114,7 +93,6 @@ class _PaginatedListViewState<T> extends State<PaginatedListView<T>> {
     super.dispose();
   }
 
-  /// Listen to scroll position and trigger load more
   void _scrollListener() {
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent * widget.loadMoreThreshold) {
@@ -122,7 +100,6 @@ class _PaginatedListViewState<T> extends State<PaginatedListView<T>> {
     }
   }
 
-  /// Load more items
   Future<void> _loadMoreItems() async {
     if (_isLoadingMore || !widget.hasMore || widget.onLoadMore == null) {
       return;
@@ -146,13 +123,12 @@ class _PaginatedListViewState<T> extends State<PaginatedListView<T>> {
         setState(() {
           _isLoadingMore = false;
           _loadMoreError = e.toString();
-          _currentPage--; // Revert page increment
+          _currentPage--;
         });
       }
     }
   }
 
-  /// Handle refresh
   Future<void> _handleRefresh() async {
     if (widget.onRefresh == null) return;
 
@@ -172,7 +148,6 @@ class _PaginatedListViewState<T> extends State<PaginatedListView<T>> {
     }
   }
 
-  /// Build empty state
   Widget _buildEmptyState() {
     if (widget.emptyWidget != null) {
       return widget.emptyWidget!;
@@ -208,7 +183,6 @@ class _PaginatedListViewState<T> extends State<PaginatedListView<T>> {
     );
   }
 
-  /// Build loading widget
   Widget _buildLoadingWidget() {
     if (widget.loadingWidget != null) {
       return widget.loadingWidget!;
@@ -222,7 +196,6 @@ class _PaginatedListViewState<T> extends State<PaginatedListView<T>> {
     );
   }
 
-  /// Build error widget
   Widget _buildErrorWidget(String error, VoidCallback? onRetry) {
     if (widget.errorBuilder != null) {
       return widget.errorBuilder!(error, onRetry);
@@ -262,7 +235,6 @@ class _PaginatedListViewState<T> extends State<PaginatedListView<T>> {
     );
   }
 
-  /// Build bottom loader
   Widget _buildBottomLoader() {
     if (!widget.showBottomLoader) return const SizedBox.shrink();
 
@@ -305,7 +277,6 @@ class _PaginatedListViewState<T> extends State<PaginatedListView<T>> {
     return const SizedBox.shrink();
   }
 
-  /// Build list item with separator
   Widget _buildListItem(int index) {
     if (index >= widget.items.length) {
       return _buildBottomLoader();
@@ -326,17 +297,15 @@ class _PaginatedListViewState<T> extends State<PaginatedListView<T>> {
 
   @override
   Widget build(BuildContext context) {
-    // Show error state
     if (widget.errorMessage != null && widget.items.isEmpty) {
       return _buildErrorWidget(widget.errorMessage!, widget.onRetry);
     }
 
-    // Show loading state
     if (widget.isLoading && widget.items.isEmpty) {
       return _buildLoadingWidget();
     }
 
-    // Show empty state
+
     if (widget.items.isEmpty) {
       if (widget.onRefresh != null) {
         return RefreshIndicator(
@@ -353,7 +322,6 @@ class _PaginatedListViewState<T> extends State<PaginatedListView<T>> {
       return _buildEmptyState();
     }
 
-    // Build list view
     final listView = ListView.builder(
       controller: _scrollController,
       physics: widget.physics,
@@ -364,7 +332,6 @@ class _PaginatedListViewState<T> extends State<PaginatedListView<T>> {
       itemBuilder: (context, index) => _buildListItem(index),
     );
 
-    // Wrap with refresh indicator if onRefresh is provided
     if (widget.onRefresh != null) {
       return RefreshIndicator(onRefresh: _handleRefresh, child: listView);
     }
@@ -373,7 +340,6 @@ class _PaginatedListViewState<T> extends State<PaginatedListView<T>> {
   }
 }
 
-/// Grid variant of paginated view
 class PaginatedGridView<T> extends StatefulWidget {
   final List<T> items;
   final Widget Function(BuildContext context, T item, int index) itemBuilder;
@@ -390,7 +356,7 @@ class PaginatedGridView<T> extends StatefulWidget {
   final ScrollController? scrollController;
 
   const PaginatedGridView({
-    Key? key,
+    super.key,
     required this.items,
     required this.itemBuilder,
     this.onLoadMore,
@@ -404,7 +370,7 @@ class PaginatedGridView<T> extends StatefulWidget {
     this.padding,
     this.emptyWidget,
     this.scrollController,
-  }) : super(key: key);
+  });
 
   @override
   State<PaginatedGridView<T>> createState() => _PaginatedGridViewState<T>();

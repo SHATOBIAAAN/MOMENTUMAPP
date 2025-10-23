@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
 
-/// Dark Theme for the app using Material 3
-/// Clean, modern, and minimalistic design with dark colors
 ThemeData darkTheme() {
   return ThemeData(
     useMaterial3: true,
     brightness: Brightness.dark,
-
-    // Color Scheme
     colorScheme: ColorScheme.dark(
       primary: const Color(0xFFD0BCFF),
       onPrimary: const Color(0xFF381E72),

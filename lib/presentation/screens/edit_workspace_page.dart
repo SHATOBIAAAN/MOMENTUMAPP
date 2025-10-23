@@ -10,9 +10,9 @@ class EditWorkspacePage extends StatefulWidget {
   final Workspace workspace;
 
   const EditWorkspacePage({
-    Key? key,
+    super.key,
     required this.workspace,
-  }) : super(key: key);
+  });
 
   @override
   State<EditWorkspacePage> createState() => _EditWorkspacePageState();
