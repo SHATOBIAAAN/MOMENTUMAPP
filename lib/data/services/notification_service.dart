@@ -28,7 +28,7 @@ class NotificationService {
 
     // Android initialization settings
     const androidSettings = AndroidInitializationSettings(
-      '@mipmap/ic_launcher',
+      '@drawable/ic_launcher',
     );
 
     // iOS initialization settings
@@ -152,7 +152,7 @@ class NotificationService {
         channelDescription: 'Notifications for upcoming tasks',
         importance: Importance.high,
         priority: Priority.high,
-        icon: '@mipmap/ic_launcher',
+        icon: '@drawable/ic_launcher',
         enableLights: true,
         enableVibration: true,
       );
@@ -231,7 +231,7 @@ class NotificationService {
           channelDescription: 'Notifications for upcoming tasks',
           importance: Importance.high,
           priority: Priority.high,
-          icon: '@mipmap/ic_launcher',
+          icon: '@drawable/ic_launcher',
         );
 
         const iosDetails = DarwinNotificationDetails();
@@ -278,7 +278,7 @@ class NotificationService {
         channelDescription: 'Notifications for overdue tasks',
         importance: Importance.max,
         priority: Priority.max,
-        icon: '@mipmap/ic_launcher',
+        icon: '@drawable/ic_launcher',
         enableLights: true,
         enableVibration: true,
         playSound: true,
@@ -328,7 +328,7 @@ class NotificationService {
         channelDescription: 'Immediate notifications',
         importance: Importance.high,
         priority: Priority.high,
-        icon: '@mipmap/ic_launcher',
+        icon: '@drawable/ic_launcher',
       );
 
       const iosDetails = DarwinNotificationDetails();
@@ -419,7 +419,7 @@ class NotificationService {
         channelDescription: 'Daily task summary notifications',
         importance: Importance.defaultImportance,
         priority: Priority.defaultPriority,
-        icon: '@mipmap/ic_launcher',
+        icon: '@drawable/ic_launcher',
         styleInformation: BigTextStyleInformation(''),
       );
 

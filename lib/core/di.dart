@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
@@ -56,22 +57,32 @@ class DI {
   /// Initialize all dependencies
   /// Must be called before using any dependencies
   static Future<void> init() async {
-    // Initialize SQLite database
-    final dir = await getApplicationDocumentsDirectory();
-    final path = join(dir.path, 'momentum.db');
-    _database = await openDatabase(
-      path,
-      version: 2,
-      onCreate: _createDatabase,
-      onUpgrade: _upgradeDatabase,
-    );
+    try {
+      debugPrint('DI: Initializing SQLite database...');
+      // Initialize SQLite database
+      final dir = await getApplicationDocumentsDirectory();
+      final path = join(dir.path, 'momentum.db');
+      _database = await openDatabase(
+        path,
+        version: 2,
+        onCreate: _createDatabase,
+        onUpgrade: _upgradeDatabase,
+      );
+      debugPrint('DI: Database initialized successfully');
+    } catch (e) {
+      debugPrint('DI: Failed to initialize database: $e');
+      rethrow;
+    }
 
     // Initialize data sources
+    debugPrint('DI: Initializing data sources...');
     _taskLocalDataSource = TaskLocalDataSource(_database);
     _workspaceLocalDataSource = WorkspaceLocalDataSource(_database);
     _tagLocalDataSource = TagLocalDataSourceImpl(_database);
+    debugPrint('DI: Data sources initialized');
 
     // Initialize repositories
+    debugPrint('DI: Initializing repositories...');
     _workspaceRepository = WorkspaceRepositoryImpl(localDataSource: _workspaceLocalDataSource);
     _taskRepository = TaskRepositoryImpl(
       localDataSource: _taskLocalDataSource,
@@ -79,6 +90,7 @@ class DI {
     );
     _tagRepository = TagRepositoryImpl(localDataSource: _tagLocalDataSource);
     _appStateProvider = AppStateProvider();
+    debugPrint('DI: Repositories initialized');
 
     // Initialize use cases
     _getAllTasksUseCase = GetAllTasksUseCase(_taskRepository);

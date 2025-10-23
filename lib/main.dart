@@ -17,53 +17,102 @@ import 'data/services/github_sync_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize dependency injection and Isar database
-  await DI.init();
+  // Declare GitHub Sync Service
+  late GitHubSyncService githubSyncService;
 
-  // Initialize theme provider
-  final themeProvider = ThemeProvider();
-  await themeProvider.initialize();
+  try {
+    debugPrint('Momentum: Starting app initialization...');
+    
+    // Initialize dependency injection and SQLite database
+    debugPrint('Momentum: Initializing DI...');
+    await DI.init();
+    debugPrint('Momentum: DI initialized successfully');
 
-  // Initialize app state provider
-  final appStateProvider = AppStateProvider();
-  await appStateProvider.initialize();
+    // Initialize GitHub Sync Service AFTER DI is ready
+    githubSyncService = GitHubSyncService();
 
-  // Initialize localization
-  await EasyLocalization.ensureInitialized();
+    // Initialize theme provider
+    debugPrint('Momentum: Initializing theme provider...');
+    final themeProvider = ThemeProvider();
+    await themeProvider.initialize();
+    debugPrint('Momentum: Theme provider initialized');
 
-  // Initialize notification service
-  final notificationService = NotificationService();
-  await notificationService.initialize(
-    onNotificationTapped: (payload) {
-      debugPrint('Notification tapped with payload: $payload');
-      // Handle notification tap - navigate to task details
-      if (payload != null && payload.startsWith('task_')) {
-        final taskId = int.tryParse(payload.split('_')[1]);
-        if (taskId != null) {
-          // Navigate to task details
-          debugPrint('Navigate to task: $taskId');
-        }
-      }
-    },
-  );
+    // Initialize app state provider
+    debugPrint('Momentum: Initializing app state provider...');
+    final appStateProvider = AppStateProvider();
+    await appStateProvider.initialize();
+    debugPrint('Momentum: App state provider initialized');
 
-  // Initialize GitHub Sync Service
-  final githubSyncService = GitHubSyncService();
-  await githubSyncService.initialize(
-    taskRepository: DI.taskRepository,
-    workspaceRepository: DI.workspaceRepository,
-    tagRepository: DI.tagRepository,
-    enableAutoSync: true,
-  );
+    // Initialize localization
+    debugPrint('Momentum: Initializing localization...');
+    await EasyLocalization.ensureInitialized();
+    debugPrint('Momentum: Localization initialized');
 
+    // Initialize notification service
+    debugPrint('Momentum: Initializing notification service...');
+    try {
+      final notificationService = NotificationService();
+      debugPrint('Momentum: NotificationService created');
+      
+      await notificationService.initialize(
+        onNotificationTapped: (payload) {
+          debugPrint('Notification tapped with payload: $payload');
+          // Handle notification tap - navigate to task details
+          if (payload != null && payload.startsWith('task_')) {
+            final taskId = int.tryParse(payload.split('_')[1]);
+            if (taskId != null) {
+              // Navigate to task details
+              debugPrint('Navigate to task: $taskId');
+            }
+          }
+        },
+      );
+      debugPrint('Momentum: Notification service initialized successfully');
+    } catch (e, stackTrace) {
+      debugPrint('Momentum: Notification service failed to initialize: $e');
+      debugPrint('Momentum: Notification service stack trace: $stackTrace');
+      debugPrint('Momentum: Continuing without notifications...');
+      // Continue without notifications - app will work without notifications
+    }
+
+    // Initialize GitHub Sync Service with error handling
+    debugPrint('Momentum: Initializing GitHub sync service...');
+    try {
+      debugPrint('Momentum: Checking DI repositories...');
+      debugPrint('Momentum: taskRepository: ${DI.taskRepository}');
+      debugPrint('Momentum: workspaceRepository: ${DI.workspaceRepository}');
+      debugPrint('Momentum: tagRepository: ${DI.tagRepository}');
+      
+      debugPrint('Momentum: Calling githubSyncService.initialize()...');
+      await githubSyncService.initialize(
+        taskRepository: DI.taskRepository,
+        workspaceRepository: DI.workspaceRepository,
+        tagRepository: DI.tagRepository,
+        enableAutoSync: true, // Enabled for GitHub sync
+      );
+      debugPrint('Momentum: GitHub sync service initialized with auto-sync enabled');
+    } catch (e) {
+      debugPrint('Momentum: GitHub sync service failed to initialize: $e');
+      debugPrint('Momentum: Stack trace: ${StackTrace.current}');
+      debugPrint('Momentum: Continuing without GitHub sync...');
+      // Continue without GitHub sync - app will work with local database only
+    }
+  } catch (e, stackTrace) {
+    debugPrint('Momentum: Failed to initialize app: $e');
+    debugPrint('Momentum: Stack trace: $stackTrace');
+    // Continue anyway to show error screen
+  }
+
+  debugPrint('Momentum: Starting app...');
+  
   runApp(
     EasyLocalization(
       supportedLocales: const [Locale('en'), Locale('ru')],
       path: 'assets/translations',
       fallbackLocale: const Locale('ru'),
       child: MomentumApp(
-        themeProvider: themeProvider,
-        appStateProvider: appStateProvider,
+        themeProvider: ThemeProvider(),
+        appStateProvider: AppStateProvider(),
         githubSyncService: githubSyncService,
       ),
     ),

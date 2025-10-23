@@ -18,7 +18,30 @@ import '../../domain/repositories/tag_repository.dart';
 class GitHubSyncService {
   static final GitHubSyncService _instance = GitHubSyncService._internal();
   factory GitHubSyncService() => _instance;
-  GitHubSyncService._internal();
+  GitHubSyncService._internal() {
+    // Initialize Dio immediately when service is created
+    _dio = Dio(
+      BaseOptions(
+        baseUrl: 'https://api.github.com',
+        connectTimeout: const Duration(seconds: 15),
+        receiveTimeout: const Duration(seconds: 15),
+        sendTimeout: const Duration(seconds: 15),
+        headers: {
+          'Accept': 'application/vnd.github.v3+json',
+          'User-Agent': 'Momentum-App/1.0.0',
+        },
+      ),
+    );
+    
+    // Add interceptors for better error handling
+    _dio.interceptors.add(LogInterceptor(
+      requestBody: false,
+      responseBody: false,
+      logPrint: (obj) => debugPrint('Dio: $obj'),
+    ));
+    
+    debugPrint('GitHubSyncService: Dio initialized');
+  }
 
   late Dio _dio;
   final Connectivity _connectivity = Connectivity();
@@ -87,26 +110,8 @@ class GitHubSyncService {
     _tagRepository = tagRepository;
     _autoSyncEnabled = enableAutoSync;
 
-    // Initialize Dio with proper configuration for macOS
-    _dio = Dio(
-      BaseOptions(
-        baseUrl: 'https://api.github.com',
-        connectTimeout: const Duration(seconds: 30),
-        receiveTimeout: const Duration(seconds: 30),
-        sendTimeout: const Duration(seconds: 30),
-        headers: {
-          'Accept': 'application/vnd.github.v3+json',
-          'User-Agent': 'Momentum-App/1.0.0',
-        },
-      ),
-    );
-    
-    // Add interceptors for better error handling
-    _dio.interceptors.add(LogInterceptor(
-      requestBody: false,
-      responseBody: false,
-      logPrint: (obj) => debugPrint('Dio: $obj'),
-    ));
+    // Initialize GitHub sync on all platforms
+    debugPrint('GitHubSyncService: Initializing GitHub sync service...');
     
     // Test basic connectivity first
     await _testBasicConnectivity();
@@ -170,6 +175,9 @@ class GitHubSyncService {
     required String repositoryName,
     String branchName = 'main',
   }) async {
+    // Configure GitHub on all platforms
+    
+    
     try {
       // Test GitHub connection
       _dio.options.headers['Authorization'] = 'token $token';
@@ -223,23 +231,38 @@ class GitHubSyncService {
 
   /// Save GitHub configuration
   Future<void> _saveConfiguration(String token, String repositoryOwner, String repositoryName, String branchName) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('github_token', token);
-    await prefs.setString('github_repo_owner', repositoryOwner);
-    await prefs.setString('github_repo_name', repositoryName);
-    await prefs.setString('github_branch', branchName);
+    try {
+      debugPrint('GitHubSyncService: Saving configuration...');
+      final prefs = await SharedPreferences.getInstance();
+      
+      // Save each setting individually with error handling
+      final tokenResult = await prefs.setString('github_token', token);
+      final ownerResult = await prefs.setString('github_repo_owner', repositoryOwner);
+      final nameResult = await prefs.setString('github_repo_name', repositoryName);
+      final branchResult = await prefs.setString('github_branch', branchName);
+      
+      if (!tokenResult || !ownerResult || !nameResult || !branchResult) {
+        debugPrint('GitHubSyncService: Failed to save some configuration settings');
+        throw Exception('Failed to save configuration to SharedPreferences');
+      }
+      
+      debugPrint('GitHubSyncService: Configuration saved successfully');
 
-    _githubToken = token;
-    _repositoryOwner = repositoryOwner;
-    _repositoryName = repositoryName;
-    _branchName = branchName;
+      _githubToken = token;
+      _repositoryOwner = repositoryOwner;
+      _repositoryName = repositoryName;
+      _branchName = branchName;
 
-    // Update Dio headers
-    _dio.options.headers['Authorization'] = 'token $token';
+      // Update Dio headers
+      _dio.options.headers['Authorization'] = 'token $token';
 
-    // Start auto-sync if enabled
-    if (_autoSyncEnabled) {
-      _startAutoSync();
+      // Start auto-sync if enabled
+      if (_autoSyncEnabled) {
+        _startAutoSync();
+      }
+    } catch (e) {
+      debugPrint('GitHubSyncService: Failed to save configuration: $e');
+      rethrow;
     }
   }
 
@@ -387,6 +410,8 @@ class GitHubSyncService {
 
   /// Sync all data with GitHub
   Future<GitHubSyncResult> syncAll() async {
+    // Sync on all platforms
+    
     if (_isSyncing) {
       debugPrint('GitHubSyncService: Sync already in progress');
       return GitHubSyncResult(
@@ -464,6 +489,10 @@ class GitHubSyncService {
       debugPrint('GitHubSyncService: Current commit SHA: $currentCommit');
 
       // Check if local database is empty
+      if (_taskRepository == null || _workspaceRepository == null || _tagRepository == null) {
+        throw Exception('Repositories not initialized');
+      }
+      
       final localTasks = await _taskRepository!.getAllTasks();
       final localWorkspaces = await _workspaceRepository!.getAllWorkspaces();
       final localTags = await _tagRepository!.getAllTags();
@@ -524,15 +553,25 @@ class GitHubSyncService {
       String errorMessage = 'GitHub sync failed';
       if (e is DioException) {
         if (e.type == DioExceptionType.connectionError) {
-          errorMessage = 'Connection error - check your internet connection and firewall settings. On macOS, make sure the app has network permissions.';
           debugPrint('GitHubSyncService: Connection error details: ${e.message}');
           if (e.error is SocketException) {
             final socketError = e.error as SocketException;
             debugPrint('GitHubSyncService: Socket error: ${socketError.message}');
             debugPrint('GitHubSyncService: Error code: ${socketError.osError?.errorCode}');
-            if (socketError.osError?.errorCode == 1) {
-              errorMessage = 'Network permission denied - please check macOS network permissions for this app';
+            
+            if (socketError.message.contains('Failed host lookup')) {
+              errorMessage = 'DNS resolution failed - check your internet connection';
+            } else if (socketError.message.contains('Connection refused')) {
+              errorMessage = 'Connection refused - check firewall settings';
+            } else if (socketError.osError?.errorCode == 7) {
+              errorMessage = 'No internet connection - please check your network';
+            } else if (socketError.osError?.errorCode == 1) {
+              errorMessage = 'Network permission denied - please check app permissions';
+            } else {
+              errorMessage = 'Network error: ${socketError.message}';
             }
+          } else {
+            errorMessage = 'Connection error - check your internet connection';
           }
         } else if (e.type == DioExceptionType.connectionTimeout) {
           errorMessage = 'Connection timeout - try again later';
@@ -1367,29 +1406,53 @@ class GitHubSyncService {
 
   /// Update sync settings
   Future<void> updateSyncSettings(bool enabled) async {
-    _syncEnabled = enabled;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('sync_enabled', enabled);
-    debugPrint('GitHubSyncService: Sync settings updated: $enabled');
+    try {
+      debugPrint('GitHubSyncService: Updating sync settings to: $enabled');
+      _syncEnabled = enabled;
+      final prefs = await SharedPreferences.getInstance();
+      final result = await prefs.setBool('sync_enabled', enabled);
+      
+      if (!result) {
+        debugPrint('GitHubSyncService: Failed to save sync settings');
+        throw Exception('Failed to save sync settings to SharedPreferences');
+      }
+      
+      debugPrint('GitHubSyncService: Sync settings updated successfully: $enabled');
 
-    // Restart or stop auto-sync based on new setting
-    if (enabled && isConfigured) {
-      _startAutoSync();
-      // Моментальная синхронизация при включении
-      debugPrint('GitHubSyncService: Triggering immediate sync on enable...');
-      syncAll();
-    } else {
-      _stopAutoSync();
+      // Restart or stop auto-sync based on new setting
+      if (enabled && isConfigured) {
+        _startAutoSync();
+        // Моментальная синхронизация при включении
+        debugPrint('GitHubSyncService: Triggering immediate sync on enable...');
+        syncAll();
+      } else {
+        _stopAutoSync();
+      }
+    } catch (e) {
+      debugPrint('GitHubSyncService: Failed to update sync settings: $e');
+      rethrow;
     }
   }
 
   /// Force reset sync settings to offline mode
   Future<void> resetToOfflineMode() async {
-    _syncEnabled = false;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('sync_enabled', false);
-    _stopAutoSync();
-    debugPrint('GitHubSyncService: Forced reset to offline mode');
+    try {
+      debugPrint('GitHubSyncService: Resetting to offline mode...');
+      _syncEnabled = false;
+      final prefs = await SharedPreferences.getInstance();
+      final result = await prefs.setBool('sync_enabled', false);
+      
+      if (!result) {
+        debugPrint('GitHubSyncService: Failed to save offline mode setting');
+        throw Exception('Failed to save offline mode to SharedPreferences');
+      }
+      
+      _stopAutoSync();
+      debugPrint('GitHubSyncService: Successfully reset to offline mode');
+    } catch (e) {
+      debugPrint('GitHubSyncService: Failed to reset to offline mode: $e');
+      rethrow;
+    }
   }
 
   /// Setup data change listeners for automatic sync
@@ -1424,6 +1487,8 @@ class GitHubSyncService {
   /// Trigger sync when data changes (with debouncing and rate limit protection)
   void _triggerSync() {
     debugPrint('GitHubSyncService: _triggerSync called');
+
+    // Sync on all platforms
 
     if (!isConfigured) {
       debugPrint('GitHubSyncService: Cannot sync - not configured');
