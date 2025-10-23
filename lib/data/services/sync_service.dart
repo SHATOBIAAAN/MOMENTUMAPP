@@ -2,11 +2,9 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../domain/entities/task.dart';
 import '../../domain/repositories/task_repository.dart';
 import '../../domain/repositories/workspace_repository.dart';
 import '../../domain/repositories/tag_repository.dart';
-import 'api_service.dart';
 
 /// Service for offline-first data synchronization
 /// Manages sync between local database and remote server
@@ -15,7 +13,6 @@ class SyncService {
   factory SyncService() => _instance;
   SyncService._internal();
 
-  final ApiService _apiService = ApiService();
   final Connectivity _connectivity = Connectivity();
 
   TaskRepository? _taskRepository;
@@ -154,13 +151,7 @@ class SyncService {
       return SyncResult(success: false, message: 'No internet connection');
     }
 
-    if (!_apiService.isAuthenticated) {
-      debugPrint('SyncService: User not authenticated');
-      _syncStatusController.add(
-        SyncStatus(state: SyncState.failed, message: 'User not authenticated'),
-      );
-      return SyncResult(success: false, message: 'User not authenticated');
-    }
+    // Authentication check removed - using only local sync
 
     _isSyncing = true;
     _syncStatusController.add(
@@ -203,94 +194,39 @@ class SyncService {
     }
   }
 
-  /// Sync tasks with server
+  /// Sync tasks (local only for now)
   Future<void> _syncTasks() async {
     if (_taskRepository == null) return;
 
     try {
-      // Get local tasks
-      final localTasks = await _taskRepository!.getAllTasks();
-
-      // Send to server and get updated tasks
-      final syncResult = await _apiService.syncTasks(localTasks);
-
-      // Delete tasks that were deleted on server
-      for (final deletedId in syncResult.deletedIds) {
-        await _taskRepository!.deleteTask(deletedId);
-      }
-
-      // Update or create tasks from server
-      for (final serverTask in syncResult.tasks) {
-        final localTask = await _taskRepository!.getTaskById(serverTask.id);
-        if (localTask != null) {
-          // Resolve conflicts (server wins for now - can be improved)
-          await _taskRepository!.updateTask(serverTask);
-        } else {
-          await _taskRepository!.createTask(serverTask);
-        }
-      }
-
-      debugPrint('SyncService: Tasks synced successfully');
+      // Local sync only - no server communication
+      debugPrint('SyncService: Tasks synced locally');
     } catch (e) {
       debugPrint('SyncService: Error syncing tasks: $e');
       rethrow;
     }
   }
 
-  /// Sync workspaces with server
+  /// Sync workspaces (local only for now)
   Future<void> _syncWorkspaces() async {
     if (_workspaceRepository == null) return;
 
     try {
-      // Get local workspaces
-      final localWorkspaces = await _workspaceRepository!.getAllWorkspaces();
-
-      // Send to server and get updated workspaces
-      final serverWorkspaces = await _apiService.syncWorkspaces(
-        localWorkspaces,
-      );
-
-      // Update local workspaces
-      for (final serverWorkspace in serverWorkspaces) {
-        final localWorkspace = await _workspaceRepository!.getWorkspaceById(
-          serverWorkspace.id,
-        );
-        if (localWorkspace != null) {
-          await _workspaceRepository!.updateWorkspace(serverWorkspace);
-        } else {
-          await _workspaceRepository!.createWorkspace(serverWorkspace);
-        }
-      }
-
-      debugPrint('SyncService: Workspaces synced successfully');
+      // Local sync only - no server communication
+      debugPrint('SyncService: Workspaces synced locally');
     } catch (e) {
       debugPrint('SyncService: Error syncing workspaces: $e');
       rethrow;
     }
   }
 
-  /// Sync tags with server
+  /// Sync tags (local only for now)
   Future<void> _syncTags() async {
     if (_tagRepository == null) return;
 
     try {
-      // Get local tags
-      final localTags = await _tagRepository!.getAllTags();
-
-      // Send to server and get updated tags
-      final serverTags = await _apiService.syncTags(localTags);
-
-      // Update local tags
-      for (final serverTag in serverTags) {
-        final localTag = await _tagRepository!.getTagById(serverTag.id);
-        if (localTag != null) {
-          await _tagRepository!.updateTag(serverTag);
-        } else {
-          await _tagRepository!.createTag(serverTag);
-        }
-      }
-
-      debugPrint('SyncService: Tags synced successfully');
+      // Local sync only - no server communication
+      debugPrint('SyncService: Tags synced locally');
     } catch (e) {
       debugPrint('SyncService: Error syncing tags: $e');
       rethrow;
@@ -323,27 +259,10 @@ class SyncService {
     }
   }
 
-  /// Execute a single sync operation
+  /// Execute a single sync operation (local only)
   Future<void> _executeOperation(SyncOperation operation) async {
-    switch (operation.type) {
-      case SyncOperationType.createTask:
-        if (operation.data is Task) {
-          await _apiService.createTask(operation.data as Task);
-        }
-        break;
-      case SyncOperationType.updateTask:
-        if (operation.data is Task) {
-          await _apiService.updateTask(operation.data as Task);
-        }
-        break;
-      case SyncOperationType.deleteTask:
-        if (operation.data is int) {
-          await _apiService.deleteTask(operation.data as int);
-        }
-        break;
-      default:
-        debugPrint('SyncService: Unknown operation type: ${operation.type}');
-    }
+    // Local operations only - no server communication
+    debugPrint('SyncService: Executing local operation: ${operation.type}');
   }
 
   /// Force sync now (manual sync)
@@ -352,46 +271,32 @@ class SyncService {
     return await syncAll();
   }
 
-  /// Upload only (push local changes to server)
+  /// Upload only (local only for now)
   Future<void> uploadChanges() async {
     if (_taskRepository == null) return;
 
     try {
-      final localTasks = await _taskRepository!.getAllTasks();
-      await _apiService.batchUploadTasks(localTasks);
-      debugPrint('SyncService: Changes uploaded successfully');
+      // Local operations only - no server communication
+      debugPrint('SyncService: Changes processed locally');
     } catch (e) {
-      debugPrint('SyncService: Error uploading changes: $e');
+      debugPrint('SyncService: Error processing changes: $e');
       rethrow;
     }
   }
 
-  /// Download only (pull server changes to local)
+  /// Download only (local only for now)
   Future<void> downloadChanges() async {
     if (_taskRepository == null) return;
 
     try {
-      final serverTasks = await _apiService.fetchTasks();
-      for (final task in serverTasks) {
-        await _taskRepository!.updateTask(task);
-      }
-      debugPrint('SyncService: Changes downloaded successfully');
+      // Local operations only - no server communication
+      debugPrint('SyncService: Changes processed locally');
     } catch (e) {
-      debugPrint('SyncService: Error downloading changes: $e');
+      debugPrint('SyncService: Error processing changes: $e');
       rethrow;
     }
   }
 
-  /// Resolve sync conflict (strategy: server wins)
-  Future<Task> _resolveConflict(Task local, Task server) async {
-    // Simple strategy: server wins
-    // Can be improved with:
-    // - User choice
-    // - Timestamp comparison
-    // - Merge strategy
-    debugPrint('SyncService: Conflict resolved (server wins)');
-    return server;
-  }
 
   /// Clear sync data
   Future<void> clearSyncData() async {

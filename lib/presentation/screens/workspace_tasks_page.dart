@@ -1185,9 +1185,14 @@ class _WorkspaceTasksPageState extends State<WorkspaceTasksPage>
   }
 
   void _showTagFilterMenu(BuildContext context, bool isDark) {
+    // Check if modal is already open
+    if (ModalRoute.of(context)?.isCurrent != true) return;
+    
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
+      isDismissible: true,
+      enableDrag: true,
       builder: (context) => Container(
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1A1D29) : Colors.white,

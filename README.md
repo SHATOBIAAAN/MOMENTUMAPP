@@ -215,26 +215,3 @@ flutter test test/domain/usecases/get_all_tasks_use_case_test.dart
 ## 📄 Лицензия
 
 Этот проект лицензирован под MIT License - см. файл [LICENSE](LICENSE) для деталей.
-
-## 👨‍💻 Автор
-
-**Сергей** - [@your-github](https://github.com/your-github)
-
-## 🙏 Благодарности
-
-- [Flutter Team](https://flutter.dev) за отличный фреймворк
-- [Material Design](https://material.io) за дизайн-систему
-- [Isar Database](https://isar.dev) за быструю локальную базу данных
-- Всем контрибьюторам проекта
-
----
-
-<div align="center">
-
-**⭐ Поставьте звезду, если проект вам понравился!**
-
-[![GitHub stars](https://img.shields.io/github/stars/your-username/momentum?style=social)](https://github.com/your-username/momentum/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/your-username/momentum?style=social)](https://github.com/your-username/momentum/network/members)
-[![GitHub issues](https://img.shields.io/github/issues/your-username/momentum)](https://github.com/your-username/momentum/issues)
-
-</div>

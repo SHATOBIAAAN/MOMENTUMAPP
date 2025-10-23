@@ -737,10 +737,15 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _showWorkspaceOptions(Workspace workspace) {
+    // Check if modal is already open
+    if (ModalRoute.of(context)?.isCurrent != true) return;
+    
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
+      isDismissible: true,
+      enableDrag: true,
       builder: (context) => Container(
         decoration: BoxDecoration(
           color: Theme.of(context).scaffoldBackgroundColor,
