@@ -1,12 +1,10 @@
-import 'package:isar/isar.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart';
 
 import '../data/datasources/task_local_data_source.dart';
 import '../data/datasources/workspace_local_data_source.dart';
 import '../data/datasources/tag_local_data_source.dart';
-import '../data/models/task_model.dart';
-import '../data/models/workspace_model.dart';
-import '../data/models/tag_model.dart';
 import '../data/repositories/task_repository_impl.dart';
 import '../data/repositories/workspace_repository_impl.dart';
 import '../data/repositories/tag_repository_impl.dart';
@@ -32,9 +30,9 @@ import 'app_state_provider.dart';
 
 /// Dependency Injection Container
 /// Manages all app dependencies using a simple service locator pattern
-/// Initializes Isar database and provides instances of repositories, use cases, and BLoCs
+/// Initializes SQLite database and provides instances of repositories, use cases, and BLoCs
 class DI {
-  static late Isar _isar;
+  static late Database _database;
   static late TaskLocalDataSource _taskLocalDataSource;
   static late WorkspaceLocalDataSource _workspaceLocalDataSource;
   static late TagLocalDataSource _tagLocalDataSource;
@@ -58,18 +56,20 @@ class DI {
   /// Initialize all dependencies
   /// Must be called before using any dependencies
   static Future<void> init() async {
-    // Initialize Isar database
+    // Initialize SQLite database
     final dir = await getApplicationDocumentsDirectory();
-    _isar = await Isar.open(
-      [TaskModelSchema, WorkspaceModelSchema, TagModelSchema],
-      directory: dir.path,
-      inspector: true, // Enable Isar Inspector for debugging
+    final path = join(dir.path, 'momentum.db');
+    _database = await openDatabase(
+      path,
+      version: 2,
+      onCreate: _createDatabase,
+      onUpgrade: _upgradeDatabase,
     );
 
     // Initialize data sources
-    _taskLocalDataSource = TaskLocalDataSource(_isar);
-    _workspaceLocalDataSource = WorkspaceLocalDataSource(_isar);
-    _tagLocalDataSource = TagLocalDataSourceImpl(_isar);
+    _taskLocalDataSource = TaskLocalDataSource(_database);
+    _workspaceLocalDataSource = WorkspaceLocalDataSource(_database);
+    _tagLocalDataSource = TagLocalDataSourceImpl(_database);
 
     // Initialize repositories
     _workspaceRepository = WorkspaceRepositoryImpl(localDataSource: _workspaceLocalDataSource);
@@ -98,8 +98,63 @@ class DI {
     // await _initializeSeedData();
   }
 
-  /// Get Isar instance
-  static Isar get isar => _isar;
+  /// Upgrade database
+  static Future<void> _upgradeDatabase(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      // Fix null order values in existing workspaces
+      await db.execute('UPDATE workspaces SET `order` = 0 WHERE `order` IS NULL');
+    }
+  }
+
+  /// Create database tables
+  static Future<void> _createDatabase(Database db, int version) async {
+    // Create tasks table
+    await db.execute('''
+      CREATE TABLE tasks (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        description TEXT,
+        dueDate INTEGER NOT NULL,
+        isCompleted INTEGER NOT NULL DEFAULT 0,
+        priority INTEGER NOT NULL,
+        createdAt INTEGER NOT NULL,
+        category TEXT,
+        workspaceId INTEGER,
+        progress REAL,
+        estimatedHours INTEGER,
+        tagIds TEXT
+      )
+    ''');
+
+    // Create workspaces table
+    await db.execute('''
+      CREATE TABLE workspaces (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        description TEXT,
+        iconName TEXT NOT NULL,
+        colorHex TEXT NOT NULL,
+        createdAt INTEGER NOT NULL,
+        `order` INTEGER NOT NULL DEFAULT 0,
+        totalTasks INTEGER NOT NULL DEFAULT 0,
+        completedTasks INTEGER NOT NULL DEFAULT 0
+      )
+    ''');
+
+    // Create tags table
+    await db.execute('''
+      CREATE TABLE tags (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        colorHex TEXT NOT NULL,
+        createdAt INTEGER NOT NULL,
+        usageCount INTEGER NOT NULL DEFAULT 0
+      )
+    ''');
+  }
+
+  /// Get Database instance
+  static Database get database => _database;
 
   /// Get Task Local Data Source
   static TaskLocalDataSource get taskLocalDataSource => _taskLocalDataSource;
@@ -199,6 +254,6 @@ class DI {
   /// Dispose resources
   /// Call this when the app is closing
   static Future<void> dispose() async {
-    await _isar.close();
+    await _database.close();
   }
 }

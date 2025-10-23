@@ -5,7 +5,7 @@ publish_to: "none"
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.9.2
+  sdk: ^3.8.0
 
 dependencies:
   flutter:
@@ -20,9 +20,9 @@ dependencies:
   equatable: ^2.0.5
   provider: ^6.1.1
 
-  # Local Database - Isar
-  isar: ^3.1.0+1
-  isar_flutter_libs: ^3.1.0+1
+  # Local Database - SQLite
+  sqflite: ^2.3.0
+  sqflite_common_ffi: ^2.3.0
 
   # Network
   dio: ^5.4.0
@@ -41,6 +41,7 @@ dependencies:
   # Utils
   intl: ^0.20.2
   path_provider: ^2.1.1
+  path: ^1.8.3
 
   # Navigation
   go_router: ^16.2.5
@@ -55,8 +56,8 @@ dev_dependencies:
   mockito: ^5.4.4
   build_runner: ^2.4.7
 
-  # Isar code generation
-  isar_generator: ^3.1.0+1
+  # SQLite code generation (optional)
+  # sqflite_generator: ^0.0.1
   
   # Icon generation
   flutter_launcher_icons: ^0.13.1

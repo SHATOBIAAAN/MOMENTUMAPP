@@ -1,20 +1,21 @@
-import 'package:isar/isar.dart';
+import 'package:sqflite/sqflite.dart';
 import '../models/workspace_model.dart';
 
 /// Workspace Local Data Source
-/// Handles local database operations for workspaces using Isar
+/// Handles local database operations for workspaces using SQLite
 class WorkspaceLocalDataSource {
-  final Isar _isar;
+  final Database _database;
 
-  WorkspaceLocalDataSource(this._isar);
+  WorkspaceLocalDataSource(this._database);
 
   /// Get all workspaces ordered by order field
   Future<List<WorkspaceModel>> getAllWorkspaces() async {
     try {
-      return await _isar.workspaceModels
-          .where()
-          .sortByOrder()
-          .findAll();
+      final List<Map<String, dynamic>> maps = await _database.query(
+        'workspaces',
+        orderBy: '`order` ASC',
+      );
+      return List.generate(maps.length, (i) => WorkspaceModel.fromMap(maps[i]));
     } catch (e) {
       throw Exception('Failed to get all workspaces: $e');
     }
@@ -23,7 +24,15 @@ class WorkspaceLocalDataSource {
   /// Get workspace by ID
   Future<WorkspaceModel?> getWorkspaceById(int id) async {
     try {
-      return await _isar.workspaceModels.get(id);
+      final List<Map<String, dynamic>> maps = await _database.query(
+        'workspaces',
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+      if (maps.isNotEmpty) {
+        return WorkspaceModel.fromMap(maps.first);
+      }
+      return null;
     } catch (e) {
       throw Exception('Failed to get workspace by ID: $e');
     }
@@ -32,10 +41,10 @@ class WorkspaceLocalDataSource {
   /// Create a new workspace
   Future<WorkspaceModel> createWorkspace(WorkspaceModel workspace) async {
     try {
-      await _isar.writeTxn(() async {
-        await _isar.workspaceModels.put(workspace);
-      });
-      return workspace;
+      final workspaceMap = workspace.toMap();
+      workspaceMap.remove('id'); // Remove id for auto-increment
+      final id = await _database.insert('workspaces', workspaceMap);
+      return workspace.copyWith(id: id);
     } catch (e) {
       throw Exception('Failed to create workspace: $e');
     }
@@ -44,9 +53,12 @@ class WorkspaceLocalDataSource {
   /// Update an existing workspace
   Future<WorkspaceModel> updateWorkspace(WorkspaceModel workspace) async {
     try {
-      await _isar.writeTxn(() async {
-        await _isar.workspaceModels.put(workspace);
-      });
+      await _database.update(
+        'workspaces',
+        workspace.toMap(),
+        where: 'id = ?',
+        whereArgs: [workspace.id],
+      );
       return workspace;
     } catch (e) {
       throw Exception('Failed to update workspace: $e');
@@ -56,9 +68,11 @@ class WorkspaceLocalDataSource {
   /// Delete a workspace
   Future<void> deleteWorkspace(int id) async {
     try {
-      await _isar.writeTxn(() async {
-        await _isar.workspaceModels.delete(id);
-      });
+      await _database.delete(
+        'workspaces',
+        where: 'id = ?',
+        whereArgs: [id],
+      );
     } catch (e) {
       throw Exception('Failed to delete workspace: $e');
     }
@@ -67,11 +81,15 @@ class WorkspaceLocalDataSource {
   /// Get workspace by order
   Future<WorkspaceModel?> getWorkspaceByOrder(int order) async {
     try {
-      final workspaces = await _isar.workspaceModels
-          .where()
-          .orderEqualTo(order)
-          .findAll();
-      return workspaces.isNotEmpty ? workspaces.first : null;
+      final List<Map<String, dynamic>> maps = await _database.query(
+        'workspaces',
+        where: '`order` = ?',
+        whereArgs: [order],
+      );
+      if (maps.isNotEmpty) {
+        return WorkspaceModel.fromMap(maps.first);
+      }
+      return null;
     } catch (e) {
       throw Exception('Failed to get workspace by order: $e');
     }
@@ -80,11 +98,12 @@ class WorkspaceLocalDataSource {
   /// Update workspace order
   Future<void> updateWorkspaceOrder(int workspaceId, int newOrder) async {
     try {
-      final workspace = await getWorkspaceById(workspaceId);
-      if (workspace != null) {
-        workspace.order = newOrder;
-        await updateWorkspace(workspace);
-      }
+      await _database.update(
+        'workspaces',
+        {'`order`': newOrder},
+        where: 'id = ?',
+        whereArgs: [workspaceId],
+      );
     } catch (e) {
       throw Exception('Failed to update workspace order: $e');
     }
@@ -93,12 +112,15 @@ class WorkspaceLocalDataSource {
   /// Update workspace task counts
   Future<void> updateWorkspaceTaskCounts(int workspaceId, int totalTasks, int completedTasks) async {
     try {
-      final workspace = await getWorkspaceById(workspaceId);
-      if (workspace != null) {
-        workspace.totalTasks = totalTasks;
-        workspace.completedTasks = completedTasks;
-        await updateWorkspace(workspace);
-      }
+      await _database.update(
+        'workspaces',
+        {
+          'totalTasks': totalTasks,
+          'completedTasks': completedTasks,
+        },
+        where: 'id = ?',
+        whereArgs: [workspaceId],
+      );
     } catch (e) {
       throw Exception('Failed to update workspace task counts: $e');
     }
@@ -122,8 +144,11 @@ class WorkspaceLocalDataSource {
     }
   }
 
-  /// Watch all workspaces for changes
-  Stream<List<WorkspaceModel>> watchAllWorkspaces() {
-    return _isar.workspaceModels.where().watch(fireImmediately: true);
+  /// Watch all workspaces for changes (SQLite doesn't have built-in streams)
+  Stream<List<WorkspaceModel>> watchAllWorkspaces() async* {
+    while (true) {
+      yield await getAllWorkspaces();
+      await Future.delayed(const Duration(seconds: 1));
+    }
   }
 }

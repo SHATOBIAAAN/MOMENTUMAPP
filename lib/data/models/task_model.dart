@@ -1,66 +1,62 @@
-import 'package:isar/isar.dart';
 import '../../domain/entities/task.dart';
 
-part 'task_model.g.dart';
-
-/// Task Model for Isar Database
+/// Task Model for SQLite Database
 /// This is the data layer representation of a Task
-/// Uses Isar annotations for database operations
-@collection
 class TaskModel {
-  Id id = Isar.autoIncrement;
+  int id;
 
-  late String title;
+  String title;
 
   String? description;
 
-  @Index()
-  late DateTime dueDate;
+  DateTime dueDate;
 
-  late bool isCompleted;
+  bool isCompleted;
 
-  @Enumerated(EnumType.ordinal)
-  late TaskPriority priority;
+  TaskPriority priority;
 
-  late DateTime createdAt;
+  DateTime createdAt;
 
   String? category;
 
-  @Index()
   int? workspaceId;
 
   double? progress;
 
   int? estimatedHours;
 
-  List<int>? tagIds;
+  String? tagIds; // JSON string for SQLite
 
-  /// Default constructor required by Isar
-  TaskModel();
+  /// Default constructor
+  TaskModel({
+    required this.id,
+    required this.title,
+    this.description,
+    required this.dueDate,
+    required this.isCompleted,
+    required this.priority,
+    required this.createdAt,
+    this.category,
+    this.workspaceId,
+    this.progress,
+    this.estimatedHours,
+    this.tagIds,
+  });
 
   /// Constructor from domain entity
-  TaskModel.fromEntity(Task task) {
-    // Only set ID if it's not 0 (new task)
-    if (task.id != 0) {
-      id = task.id;
-      print('TaskModel.fromEntity: Using existing ID ${task.id}');
-    } else {
-      id = Isar.autoIncrement;
-      print('TaskModel.fromEntity: Using autoIncrement for new task');
-    }
-    title = task.title;
-    description = task.description;
-    dueDate = task.dueDate;
-    isCompleted = task.isCompleted;
-    priority = task.priority;
-    createdAt = task.createdAt;
-    category = task.category;
-    workspaceId = task.workspaceId;
-    progress = task.progress;
-    estimatedHours = task.estimatedHours;
-    tagIds = task.tagIds;
-    print('TaskModel.fromEntity: Final ID = $id, title = $title');
-  }
+  TaskModel.fromEntity(Task task) 
+    : id = task.id,
+      title = task.title,
+      description = task.description,
+      dueDate = task.dueDate,
+      isCompleted = task.isCompleted,
+      priority = task.priority,
+      createdAt = task.createdAt,
+      category = task.category,
+      workspaceId = task.workspaceId,
+      progress = task.progress,
+      estimatedHours = task.estimatedHours,
+      tagIds = task.tagIds?.join(',');
 
   /// Update existing model with new data
   void updateFromEntity(Task task) {
@@ -73,14 +69,11 @@ class TaskModel {
     workspaceId = task.workspaceId;
     progress = task.progress;
     estimatedHours = task.estimatedHours;
-    tagIds = task.tagIds;
-    print('TaskModel.updateFromEntity: Updated ID = $id, title = $title');
+    tagIds = task.tagIds?.join(',');
   }
 
   /// Convert model to domain entity
   Task toEntity() {
-    print('TaskModel.toEntity: ID = $id, title = $title');
-    
     return Task(
       id: id,
       title: title,
@@ -94,7 +87,7 @@ class TaskModel {
       workspaceId: workspaceId,
       progress: progress,
       estimatedHours: estimatedHours,
-      tagIds: tagIds,
+      tagIds: tagIds?.split(',').map(int.parse).toList(),
     );
   }
 
@@ -110,19 +103,20 @@ class TaskModel {
     int? estimatedHours,
     List<int>? tagIds,
   }) {
-    return TaskModel()
-      ..id = Isar.autoIncrement
-      ..title = title
-      ..description = description
-      ..dueDate = dueDate
-      ..isCompleted = false
-      ..priority = priority
-      ..createdAt = DateTime.now()
-      ..category = category
-      ..workspaceId = workspaceId
-      ..progress = progress
-      ..estimatedHours = estimatedHours
-      ..tagIds = tagIds;
+    return TaskModel(
+      id: 0, // Will be set by database
+      title: title,
+      description: description,
+      dueDate: dueDate,
+      isCompleted: false,
+      priority: priority,
+      createdAt: DateTime.now(),
+      category: category,
+      workspaceId: workspaceId,
+      progress: progress,
+      estimatedHours: estimatedHours,
+      tagIds: tagIds?.join(','),
+    );
   }
 
   /// Copy with method for updates
@@ -140,18 +134,55 @@ class TaskModel {
     int? estimatedHours,
     List<int>? tagIds,
   }) {
-    return TaskModel()
-      ..id = id ?? this.id
-      ..title = title ?? this.title
-      ..description = description ?? this.description
-      ..dueDate = dueDate ?? this.dueDate
-      ..isCompleted = isCompleted ?? this.isCompleted
-      ..priority = priority ?? this.priority
-      ..createdAt = createdAt ?? this.createdAt
-      ..category = category ?? this.category
-      ..workspaceId = workspaceId ?? this.workspaceId
-      ..progress = progress ?? this.progress
-      ..estimatedHours = estimatedHours ?? this.estimatedHours
-      ..tagIds = tagIds ?? this.tagIds;
+    return TaskModel(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      dueDate: dueDate ?? this.dueDate,
+      isCompleted: isCompleted ?? this.isCompleted,
+      priority: priority ?? this.priority,
+      createdAt: createdAt ?? this.createdAt,
+      category: category ?? this.category,
+      workspaceId: workspaceId ?? this.workspaceId,
+      progress: progress ?? this.progress,
+      estimatedHours: estimatedHours ?? this.estimatedHours,
+      tagIds: tagIds != null ? tagIds.join(',') : this.tagIds,
+    );
+  }
+
+  /// Convert to Map for SQLite
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'dueDate': dueDate.millisecondsSinceEpoch,
+      'isCompleted': isCompleted ? 1 : 0,
+      'priority': priority.index,
+      'createdAt': createdAt.millisecondsSinceEpoch,
+      'category': category,
+      'workspaceId': workspaceId,
+      'progress': progress,
+      'estimatedHours': estimatedHours,
+      'tagIds': tagIds,
+    };
+  }
+
+  /// Create from Map (SQLite result)
+  factory TaskModel.fromMap(Map<String, dynamic> map) {
+    return TaskModel(
+      id: map['id'] as int,
+      title: map['title'] as String,
+      description: map['description'] as String?,
+      dueDate: DateTime.fromMillisecondsSinceEpoch(map['dueDate'] as int),
+      isCompleted: (map['isCompleted'] as int) == 1,
+      priority: TaskPriority.values[map['priority'] as int],
+      createdAt: DateTime.fromMillisecondsSinceEpoch(map['createdAt'] as int),
+      category: map['category'] as String?,
+      workspaceId: map['workspaceId'] as int?,
+      progress: map['progress'] as double?,
+      estimatedHours: map['estimatedHours'] as int?,
+      tagIds: map['tagIds'] as String?,
+    );
   }
 }

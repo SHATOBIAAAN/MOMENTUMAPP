@@ -1,43 +1,45 @@
-import 'package:isar/isar.dart';
-
-part 'workspace_model.g.dart';
-
 /// WorkspaceModel - Data model for workspace entity
-/// Represents a workspace in the Isar database
-@collection
+/// Represents a workspace in the SQLite database
 class WorkspaceModel {
   /// Unique identifier
-  Id id = Isar.autoIncrement;
+  int id;
 
   /// Workspace name
-  @Index()
-  late String name;
+  String name;
 
   /// Optional description
   String? description;
 
   /// Icon name for the workspace
-  late String iconName;
+  String iconName;
 
   /// Color hex code for the workspace
-  late String colorHex;
+  String colorHex;
 
   /// Creation timestamp
-  @Index()
-  late DateTime createdAt;
+  DateTime createdAt;
 
   /// Order for sorting workspaces
-  @Index()
-  late int order;
+  int order;
 
   /// Total number of tasks in this workspace
-  late int totalTasks;
+  int totalTasks;
 
   /// Number of completed tasks in this workspace
-  late int completedTasks;
+  int completedTasks;
 
   /// Default constructor
-  WorkspaceModel();
+  WorkspaceModel({
+    required this.id,
+    required this.name,
+    this.description,
+    required this.iconName,
+    required this.colorHex,
+    required this.createdAt,
+    required this.order,
+    this.totalTasks = 0,
+    this.completedTasks = 0,
+  });
 
   /// Named constructor with all parameters
   WorkspaceModel.create({
@@ -48,11 +50,12 @@ class WorkspaceModel {
     required this.order,
     this.totalTasks = 0,
     this.completedTasks = 0,
-  }) : createdAt = DateTime.now();
+  }) : id = 0, // Will be set by database
+       createdAt = DateTime.now();
 
   /// Copy with method
   WorkspaceModel copyWith({
-    Id? id,
+    int? id,
     String? name,
     String? description,
     String? iconName,
@@ -62,17 +65,17 @@ class WorkspaceModel {
     int? totalTasks,
     int? completedTasks,
   }) {
-    return WorkspaceModel.create(
+    return WorkspaceModel(
+      id: id ?? this.id,
       name: name ?? this.name,
       description: description ?? this.description,
       iconName: iconName ?? this.iconName,
       colorHex: colorHex ?? this.colorHex,
+      createdAt: createdAt ?? this.createdAt,
       order: order ?? this.order,
-    )
-      ..id = id ?? this.id
-      ..createdAt = createdAt ?? this.createdAt
-      ..totalTasks = totalTasks ?? this.totalTasks
-      ..completedTasks = completedTasks ?? this.completedTasks;
+      totalTasks: totalTasks ?? this.totalTasks,
+      completedTasks: completedTasks ?? this.completedTasks,
+    );
   }
 
   /// Convert to JSON
@@ -92,18 +95,47 @@ class WorkspaceModel {
 
   /// Create from JSON
   factory WorkspaceModel.fromJson(Map<String, dynamic> json) {
-    final model = WorkspaceModel.create(
+    return WorkspaceModel(
+      id: json['id'] as int,
       name: json['name'] as String,
       description: json['description'] as String?,
       iconName: json['iconName'] as String,
       colorHex: json['colorHex'] as String,
+      createdAt: DateTime.parse(json['createdAt'] as String),
       order: json['order'] as int,
+      totalTasks: json['totalTasks'] as int? ?? 0,
+      completedTasks: json['completedTasks'] as int? ?? 0,
     );
-    model.id = json['id'] as Id;
-    model.createdAt = DateTime.parse(json['createdAt'] as String);
-    model.totalTasks = json['totalTasks'] as int? ?? 0;
-    model.completedTasks = json['completedTasks'] as int? ?? 0;
-    return model;
+  }
+
+  /// Convert to Map for SQLite
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'description': description,
+      'iconName': iconName,
+      'colorHex': colorHex,
+      'createdAt': createdAt.millisecondsSinceEpoch,
+      '`order`': order,
+      'totalTasks': totalTasks,
+      'completedTasks': completedTasks,
+    };
+  }
+
+  /// Create from Map (SQLite result)
+  factory WorkspaceModel.fromMap(Map<String, dynamic> map) {
+    return WorkspaceModel(
+      id: map['id'] as int,
+      name: map['name'] as String,
+      description: map['description'] as String?,
+      iconName: map['iconName'] as String,
+      colorHex: map['colorHex'] as String,
+      createdAt: DateTime.fromMillisecondsSinceEpoch(map['createdAt'] as int),
+      order: (map['`order`'] as int?) ?? 0, // Handle null values
+      totalTasks: map['totalTasks'] as int,
+      completedTasks: map['completedTasks'] as int,
+    );
   }
 
   @override

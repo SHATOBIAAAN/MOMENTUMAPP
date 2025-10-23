@@ -1,4 +1,4 @@
-import 'package:isar/isar.dart';
+import 'package:sqflite/sqflite.dart';
 import '../models/tag_model.dart';
 
 abstract class TagLocalDataSource {
@@ -14,68 +14,94 @@ abstract class TagLocalDataSource {
 }
 
 class TagLocalDataSourceImpl implements TagLocalDataSource {
-  final Isar isar;
+  final Database database;
 
-  TagLocalDataSourceImpl(this.isar);
+  TagLocalDataSourceImpl(this.database);
 
   @override
   Future<List<TagModel>> getAllTags() async {
-    return await isar.tagModels.where().sortByCreatedAtDesc().findAll();
+    final List<Map<String, dynamic>> maps = await database.query(
+      'tags',
+      orderBy: 'createdAt DESC',
+    );
+    return List.generate(maps.length, (i) => TagModel.fromMap(maps[i]));
   }
 
   @override
   Future<TagModel> createTag(TagModel tag) async {
-    await isar.writeTxn(() async {
-      await isar.tagModels.put(tag);
-    });
-    return tag;
+    final tagMap = tag.toMap();
+    tagMap.remove('id'); // Remove id for auto-increment
+    final id = await database.insert('tags', tagMap);
+    return tag.copyWith(id: id);
   }
 
   @override
   Future<void> updateTag(TagModel tag) async {
-    await isar.writeTxn(() async {
-      await isar.tagModels.put(tag);
-    });
+    await database.update(
+      'tags',
+      tag.toMap(),
+      where: 'id = ?',
+      whereArgs: [tag.id],
+    );
   }
 
   @override
   Future<void> deleteTag(int id) async {
-    await isar.writeTxn(() async {
-      await isar.tagModels.delete(id);
-    });
+    await database.delete(
+      'tags',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 
   @override
   Future<TagModel?> getTagById(int id) async {
-    return await isar.tagModels.get(id);
+    final List<Map<String, dynamic>> maps = await database.query(
+      'tags',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (maps.isNotEmpty) {
+      return TagModel.fromMap(maps.first);
+    }
+    return null;
   }
 
   @override
   Future<List<TagModel>> getTagsByIds(List<int> ids) async {
-    final models = await isar.tagModels.getAll(ids);
-    return models.where((model) => model != null).cast<TagModel>().toList();
+    if (ids.isEmpty) return [];
+    
+    final placeholders = ids.map((_) => '?').join(',');
+    final List<Map<String, dynamic>> maps = await database.query(
+      'tags',
+      where: 'id IN ($placeholders)',
+      whereArgs: ids,
+    );
+    return List.generate(maps.length, (i) => TagModel.fromMap(maps[i]));
   }
 
   @override
   Future<void> incrementTagUsage(int tagId) async {
-    final tag = await getTagById(tagId);
-    if (tag != null) {
-      tag.usageCount++;
-      await updateTag(tag);
-    }
+    await database.rawUpdate(
+      'UPDATE tags SET usageCount = usageCount + 1 WHERE id = ?',
+      [tagId],
+    );
   }
 
   @override
   Future<void> decrementTagUsage(int tagId) async {
-    final tag = await getTagById(tagId);
-    if (tag != null) {
-      tag.usageCount = (tag.usageCount - 1).clamp(0, double.infinity).toInt();
-      await updateTag(tag);
-    }
+    await database.rawUpdate(
+      'UPDATE tags SET usageCount = MAX(0, usageCount - 1) WHERE id = ?',
+      [tagId],
+    );
   }
 
-  /// Watch all tags for changes
-  Stream<List<TagModel>> watchAllTags() {
-    return isar.tagModels.where().watch(fireImmediately: true);
+  /// Watch all tags for changes (SQLite doesn't have built-in streams)
+  @override
+  Stream<List<TagModel>> watchAllTags() async* {
+    while (true) {
+      yield await getAllTags();
+      await Future.delayed(const Duration(seconds: 1));
+    }
   }
 }
