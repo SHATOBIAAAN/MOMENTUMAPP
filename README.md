@@ -188,6 +188,3 @@ flutter test test/domain/usecases/get_all_tasks_use_case_test.dart
 
 </div>
 
-## 📄 Лицензия
-
-Этот проект лицензирован под MIT License - см. файл [LICENSE](LICENSE) для деталей.
