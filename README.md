@@ -44,7 +44,7 @@
 
 ```bash
 # Клонируйте репозиторий
-git clone https://github.com/your-username/momentum.git
+git clone https://github.com/SHATOBIAAAN/MOMENTUMAPP
 cd momentum
 
 # Установите зависимости
